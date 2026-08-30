@@ -21,6 +21,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Bust GAMA JS cache
+        run: |
+          sed -i "s/gama-access-control.js?v=1/gama-access-control.js?v=${GITHUB_SHA}/g" index.html
+          sed -i "s/gama-fixed-header.js?v=4/gama-fixed-header.js?v=${GITHUB_SHA}/g" index.html
+          sed -i "s/gama-role-spanish.js?v=1/gama-role-spanish.js?v=${GITHUB_SHA}/g" index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
