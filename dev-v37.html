@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>GAMA DEV V38</title>
+<title>GAMA DEV V39</title>
 <style>
 html,body{margin:0;height:100%;background:#F5F7FA;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;overflow:hidden}
 .bar{height:56px;display:flex;align-items:center;justify-content:center;background:#B95708;color:#fff;font-weight:800;font-size:13px;text-align:center;padding:0 12px;box-sizing:border-box}
@@ -12,32 +12,27 @@ html,body{margin:0;height:100%;background:#F5F7FA;font-family:-apple-system,Blin
 </style>
 </head>
 <body>
-<div class="bar">🧪 ENTORNO DE DESARROLLO · GAMA DEV V38 · Catálogo de clientes + Solicitudes de clientes</div>
+<div class="bar">🧪 ENTORNO DE DESARROLLO · GAMA DEV V39 · Catálogo de clientes + Solicitudes de clientes</div>
 <div id="boot" class="boot">Cargando GAMA DEV<small>Inicializando GAMA y los módulos de clientes…</small></div>
-<iframe id="app" class="frame" src="https://lisciandraj.github.io/Pro-manager-Gama/?dev=38&amp;v=38" title="GAMA Stock Manager DEV"></iframe>
+<iframe id="app" class="frame" src="https://lisciandraj.github.io/Pro-manager-Gama/?dev=39&amp;v=39" title="GAMA Stock Manager DEV"></iframe>
 <script>
 (()=>{
- const frame=document.getElementById('app'),boot=document.getElementById('boot');
- let done=false;
- const hide=()=>{if(!done){done=true;boot.classList.add('hidden')}};
- const fail=msg=>{if(!done)boot.innerHTML='<div><b>Error GAMA DEV</b><small>'+msg+'</small></div>'};
+ const frame=document.getElementById('app'),boot=document.getElementById('boot');let injected=false;
+ const hide=()=>boot.classList.add('hidden');
+ const fail=msg=>{boot.innerHTML='<div><b>Error GAMA DEV</b><small>'+msg+'</small></div>'};
  function inject(){
+   if(injected)return true;
    try{
      const d=frame.contentDocument;
      if(!d||!d.body)return false;
-     if(!d.querySelector('.appGrid'))return false;
-     if(d.getElementById('gamaClientModuleScript')){hide();return true}
-     const s=d.createElement('script');s.id='gamaClientModuleScript';s.src=location.origin+'/Pro-manager-Gama-DEV/gama-client-modules.js?v=38-'+Date.now();
-     s.onload=()=>hide();s.onerror=()=>fail('No se pudo cargar los módulos de clientes.');
-     d.body.appendChild(s);
-     return true;
+     if(d.getElementById('gamaClientModuleScript')){injected=true;hide();return true}
+     const s=d.createElement('script');s.id='gamaClientModuleScript';s.src=location.origin+'/Pro-manager-Gama-DEV/gama-client-modules.js?v=39-'+Date.now();
+     s.onload=()=>{injected=true;hide()};s.onerror=()=>fail('No se pudo cargar los módulos de clientes.');
+     d.body.appendChild(s);return true;
    }catch(e){return false}
  }
- frame.addEventListener('load',()=>{
-   let n=0;
-   const timer=setInterval(()=>{n++;if(inject()||n>120)clearInterval(timer)},250);
- });
- setTimeout(()=>{if(!done)fail('El menú GAMA no está disponible después de 30 segundos.')},30000);
+ frame.addEventListener('load',()=>{let n=0;const t=setInterval(()=>{n++;if(inject()||n>120)clearInterval(t)},250)});
+ setTimeout(()=>{if(!injected)fail('No se pudo inicializar GAMA DEV.')},30000);
 })();
 </script>
 </body>
