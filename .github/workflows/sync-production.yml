@@ -1,0 +1,26 @@
+name: Sync complete production into DEV
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  sync:
+    if: ${{ !startsWith(github.event.head_commit.message, 'SYNC PRODUCTION') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout DEV
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Copy production repository
+        run: |
+          git clone --depth 1 https://github.com/lisciandraj/Pro-manager-Gama.git /tmp/gama-production
+          rsync -a --delete --exclude='.git' --exclude='.github' /tmp/gama-production/ ./
+      - name: Commit production snapshot
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'SYNC PRODUCTION: complete GAMA snapshot' || exit 0
+          git push origin HEAD:main
