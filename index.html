@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>GAMA Stock Manager — DEV</title>
-<style>html,body{margin:0;width:100%;height:100%;background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}#loading{position:fixed;inset:0;display:grid;place-items:center;background:#f5f7fa;color:#18324a;font-weight:800;z-index:999999;text-align:center}#loading small{display:block;color:#71808a;font-weight:500;margin-top:8px}#error{display:none;position:fixed;left:14px;right:14px;bottom:60px;padding:12px;background:#fff0ec;color:#9b3e35;border-radius:10px;font-size:12px;z-index:999999}</style>
+<style>html,body{margin:0;width:100%;height:100%;background:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}#loading{position:fixed;inset:0;display:grid;place-items:center;background:#f5f7fa;color:#18324a;font-weight:800;z-index:999999;text-align:center}#loading small{display:block;color:#71808A;font-weight:500;margin-top:8px}#error{display:none;position:fixed;left:14px;right:14px;bottom:60px;padding:12px;background:#fff0ec;color:#9b3e35;border-radius:10px;font-size:12px;z-index:999999}</style>
 </head>
 <body>
 <div id="loading">Chargement de GAMA DEV<small>Version de développement — production inchangée</small></div>
@@ -12,7 +12,7 @@
 <script>
 (async function(){
  const PROD='https://lisciandraj.github.io/Pro-manager-Gama/';
- const RAW='https://raw.githubusercontent.com/lisciandraj/Pro-manager-Gama/main/index.html?dev=20260830-6';
+ const RAW='https://raw.githubusercontent.com/lisciandraj/Pro-manager-Gama/main/index.html?dev=20260830-7';
  const loading=document.getElementById('loading'),error=document.getElementById('error');
  function fail(e){console.error('[GAMA DEV]',e);loading.style.display='none';error.textContent='Erreur de chargement de GAMA DEV : '+(e&&e.message?e.message:e);error.style.display='block'}
  try{
@@ -20,9 +20,9 @@
   let html=await res.text();
   html=html.replace(/<head>/i,'<head><base href="'+PROD+'">');
   html=html.replace(/<\/head>/i,'<style>#gamaDevBanner{position:fixed;top:0;left:0;right:0;height:36px;background:#b45309;color:#fff;z-index:999999;font:800 11px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;display:flex;align-items:center;justify-content:center;letter-spacing:.2px;pointer-events:none}body{padding-top:36px!important}</style></head>');
-  html=html.replace(/<body([^>]*)>/i,'<body$1><div id="gamaDevBanner">🧪 ENVIRONNEMENT DE DÉVELOPPEMENT · GAMA DEV · Catalogue client + demandes clients · BUILD 2026-08-30-6</div>');
-  const moduleTag='<scr'+'ipt src="https://lisciandraj.github.io/Pro-manager-Gama-DEV/gama-client-modules-v2.js?v=20260830-6"><\/scr'+'ipt>';
-  if(/<\/body>/i.test(html)) html=html.replace(/<\/body>/i,moduleTag+'</body>'); else html+=moduleTag;
+  html=html.replace(/<body([^>]*)>/i,'<body$1><div id="gamaDevBanner">🧪 ENVIRONNEMENT DE DÉVELOPPEMENT · GAMA DEV · Catalogue client + demandes clients · BUILD 2026-08-30-7</div>');
+  const moduleTags='<scr'+'ipt src="https://lisciandraj.github.io/Pro-manager-Gama-DEV/gama-client-modules-v2.js?v=20260830-7"><\/scr'+'ipt><scr'+'ipt src="https://lisciandraj.github.io/Pro-manager-Gama-DEV/gama-client-menu-v3.js?v=20260830-7"><\/scr'+'ipt>';
+  if(/<\/body>/i.test(html)) html=html.replace(/<\/body>/i,moduleTags+'</body>'); else html+=moduleTags;
   document.open();document.write(html);document.close();
  }catch(e){fail(e)}
 })();
