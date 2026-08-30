@@ -22,7 +22,7 @@ html,body{margin:0;height:100%;background:#F5F7FA;font-family:-apple-system,Blin
    const base='<base href="https://lisciandraj.github.io/Pro-manager-Gama/">';
    const devStyle='<style id="gamaDevBannerStyle">#gamaDevBanner{position:relative;z-index:99999;min-height:42px;display:flex;align-items:center;justify-content:center;background:#B95708;color:#fff;font-weight:800;font-size:12px;text-align:center;padding:7px 10px;box-sizing:border-box}body.gamaDevLoaded{padding-top:0!important}</style>';
    const banner='<div id="gamaDevBanner">🧪 ENTORNO DE DESARROLLO · GAMA DEV V37 · Catálogo de clientes + Solicitudes de clientes</div>';
-   const module='<script src="https://lisciandraj.github.io/Pro-manager-Gama-DEV/gama-client-modules.js?v=37"><\\/script>';
+   const module='<script src="https://lisciandraj.github.io/Pro-manager-Gama-DEV/gama-client-modules.js?v=37"><\/script>';
    html=html.replace('<head>','<head>'+base+devStyle);
    html=html.replace('<body>','<body class="gamaDevLoaded">'+banner);
    html=html.replace('</body>',module+'</body>');
