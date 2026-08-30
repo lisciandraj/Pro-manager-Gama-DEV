@@ -1,20 +1,20 @@
-/* GAMA DEV — registre modulaire centralisé */
+/* GAMA DEV — registre modulaire centralisé V5
+   Le workflow client V5 gère désormais directement les tuiles et les droits.
+   Ce registre reste compatible pour les modules externes sans créer de doublons. */
 (()=>{
 'use strict';
 const MODULES=[
-{id:'client-requests',label:'Solicitudes de clientes',description:'Solicita productos y consulta tus solicitudes',roles:['client','cliente'],staffRoles:['admin','administrador','commercial'],script:'gama-client-modules-v3.js',section:'gama-catalog',tone:'teal',icon:'<path d="M4 5h16v14H4z"/><path d="m4 12 4 4h8l4-4M12 5v7m0 0-2-2m2 2 2-2"/>'},
-{id:'client-request-admin',label:'Solicitudes de clientes',description:'Gestiona las solicitudes y conviértelas en facturas',roles:['admin','administrador','commercial'],script:'gama-client-modules-v3.js',section:'gama-requests',tone:'teal',icon:'<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6M8 17h4"/>'}
+{id:'client-request',label:'Demande client',description:'Choisir des produits et envoyer une demande',roles:['client','cliente'],staffRoles:['admin','administrador','commercial'],script:'gama-client-workflow-v5.js'},
+{id:'client-request-admin',label:'Solicitudes de clientes',description:'Demandes reçues et génération de factures',roles:['admin','administrador','commercial'],staffRoles:['admin','administrador','commercial'],script:'gama-client-workflow-v5.js'}
 ];
 const session=()=>{try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')}catch(e){return null}};
 const role=()=>String(session()?.role||'').toLowerCase();
 const isStaff=()=>['admin','administrador','commercial'].includes(role());
-const visible=()=>isStaff()?MODULES.filter(m=>m.staffRoles?.includes(role())):MODULES.filter(m=>m.roles.includes(role())||!role());
-function styles(){if(document.getElementById('gamaModuleRegistryCss'))return;const s=document.createElement('style');s.id='gamaModuleRegistryCss';s.textContent='.gamaModuleTile{position:relative!important;box-sizing:border-box!important;width:100%!important;min-height:155px!important;padding:18px 10px!important;margin:0!important;border:1px solid #E1E9EC!important;border-radius:18px!important;background:#fff!important;box-shadow:0 3px 14px rgba(24,50,74,.07)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;color:#173246!important;font-family:inherit!important}.gamaModuleIcon{display:flex!important;align-items:center!important;justify-content:center!important;width:64px!important;height:64px!important;min-width:64px!important;border-radius:18px!important;background:#E8F5F6!important;color:#087C8B!important;margin:0 0 12px!important}.gamaModuleIcon.orange{background:#FFF0E5!important;color:#F47A2A!important}.gamaModuleIcon svg{width:34px!important;height:34px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}.gamaModuleBadge{position:absolute!important;right:9px!important;top:9px!important;padding:4px 8px!important;border-radius:999px!important;background:#087C8B!important;color:#fff!important;font-size:9px!important;font-weight:900!important}.gamaModuleTitle{display:block!important;color:#173246!important;font-size:16px!important;font-weight:800!important;line-height:1.2!important;text-align:center!important}.gamaModuleDesc{display:block!important;margin-top:7px!important;color:#71808A!important;font-size:11px!important;text-align:center!important}';document.head.appendChild(s)}
-function grid(){return document.querySelector('#mainmenu .gamaF2Grid')||document.querySelector('#mainmenu .grid')||document.querySelector('#mainmenu .moreGrid')||document.querySelector('.moreGrid')||document.querySelector('.grid')}
-function load(m){if(window.gamaV3?.setup){window.gamaV3.setup();return}if(document.querySelector('script[data-gama-client-v3]'))return;const s=document.createElement('script');s.src='/Pro-manager-Gama-DEV/gama-client-modules-v3.js?v=42';s.dataset.gamaClientV3='1';s.onload=()=>window.gamaV3?.setup?.();document.body.appendChild(s)}
-function tile(m){const g=grid();if(!g)return false;if(document.getElementById('gama-tile-'+m.id))return true;const b=document.createElement('button');b.id='gama-tile-'+m.id;b.type='button';b.className='gamaModuleTile';b.innerHTML='<span class="gamaModuleIcon"><svg viewBox="0 0 24 24" aria-hidden="true">'+m.icon+'</svg></span><span class="gamaModuleBadge">NUEVO</span><span class="gamaModuleTitle">'+m.label+'</span><span class="gamaModuleDesc">'+m.description+'</span>';b.onclick=()=>load(m);g.appendChild(b);return true}
-function install(){styles();visible().forEach(tile)}
-function boot(){install();const o=new MutationObserver(install);o.observe(document.body,{childList:true,subtree:true});setTimeout(()=>o.disconnect(),30000)}
-window.GamaModuleRegistry={modules:MODULES,install,register:m=>{if(m&&!MODULES.some(x=>x.id===m.id))MODULES.push(m);install()}};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+const visible=()=>isStaff()?MODULES.filter(m=>m.staffRoles.includes(role())):MODULES.filter(m=>m.roles.includes(role()));
+window.GamaModuleRegistry={
+ modules:MODULES,
+ visible,
+ install:()=>true,
+ register:m=>{if(m&&!MODULES.some(x=>x.id===m.id))MODULES.push(m)}
+};
 })();
