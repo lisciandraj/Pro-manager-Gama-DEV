@@ -1,17 +1,34 @@
 # GAMA Stock Manager — DEV
 
-Environnement de développement de GAMA Stock Manager.
+## Architecture DEV simplifiée V12
 
-## Architecture modulaire
+Le DEV repose maintenant sur **3 fichiers de pilotage seulement** :
 
-Le shell DEV ne contient plus de logique spécifique à chaque tuile. Les tuiles du menu sont centralisées dans `gama-module-registry.js`.
+- `index.html` : shell DEV + iframe du cœur GAMA.
+- `gama-dev-config.js` : registre unique des modules DEV.
+- `gama-dev-shell.js` : unique chargeur et unique gestionnaire du menu.
 
-Pour ajouter un module :
+### Ajouter un module
 
-1. créer le script du module ;
-2. ajouter **une seule entrée** dans `MODULES` dans `gama-module-registry.js` avec `id`, `label`, `icon`, `description`, `roles`, `script` et `section`.
-3. le registre charge automatiquement le script, attend que la section existe, puis crée la tuile dans `.moreGrid`.
+1. Ajouter le script du module dans `gama-dev-config.js`.
+2. Ajouter une entrée dans `replaceTiles` uniquement si le module doit apparaître comme tuile personnalisée.
+3. Le shell charge les scripts **une seule fois**, puis construit les tuiles.
 
-Le registre n'affiche le statut `✓ n/n modules visibles` que lorsque les tuiles attendues existent réellement dans le dashboard. Cela sert de garde-fou avant toute validation utilisateur.
+### Principes
 
-La production reste inchangée : ce dépôt est uniquement l'environnement DEV.
+- Un seul loader.
+- Un seul registre.
+- Un seul `MutationObserver` de secours.
+- Aucun script `setTimeout` concurrent pour le même module.
+- Aucun script de remplacement TMS séparé.
+- Les modules existants du cœur GAMA sont conservés.
+- Les modules DEV sont indépendants les uns des autres.
+- Pour retirer/remplacer un module, une seule entrée du registre est modifiée.
+
+### Modules client actuels
+
+- `Catálogo` → ouvre le catalogue client.
+- `Solicitudes de clientes` → ouvre les demandes clients.
+- Les deux remplacent les tuiles TMS sans toucher aux autres modules.
+
+La production GAMA n'est pas modifiée par cette architecture DEV.
