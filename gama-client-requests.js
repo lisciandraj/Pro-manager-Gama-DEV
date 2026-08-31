@@ -18,9 +18,10 @@ window.GamaOpenClientRequests=open;
 function boot(){
   if(loading)return;loading=true;
   let pending=2,done=()=>{pending--;if(pending<=0){loading=false;install();setTimeout(install,300);setTimeout(install,1000)}};
-  if(!document.querySelector('script[src*="gama-customer-requests.js"]'))load('gama-customer-requests.js?v=20260831-2',done);else done();
-  if(!document.querySelector('script[src*="gama-client-catalog.js"]'))load('gama-client-catalog.js?v=20260831-4',done);else done();
+  if(!document.querySelector('script[src*="gama-customer-requests.js"]'))load('gama-customer-requests.js?v=20260831-3',done);else done();
+  if(!document.querySelector('script[src*="gama-client-catalog.js"]'))load('gama-client-catalog.js?v=20260831-5',done);else done();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.addEventListener('gama:client-authenticated',()=>setTimeout(install,150));
 })();
+
