@@ -1,6 +1,6 @@
 /* GAMA DEV — compatibility bridge for access control -> cloud catalogue / customer requests */
 (function(){'use strict';
-let loading=false,menuObserver=null,bodyObserver=null;
+let loading=false,menuObserver=null,bodyObserver=null,menuClickHost=null;
 const ICONS={catalog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h2l1.7 9.2a1.8 1.8 0 0 0 1.8 1.5h7.8a1.8 1.8 0 0 0 1.7-1.3L20.2 9H7"/><path d="M9 20a1.2 1.2 0 1 0 0-2.4A1.2 1.2 0 0 0 9 20Zm8.2 0a1.2 1.2 0 1 0 0-2.4A1.2 1.2 0 0 0 17.2 20Z"/></svg>',requests:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3.5" width="12" height="17" rx="1.8"/><path d="M9 3.5h6v2H9zM9 9h6M9 12.5h6M9 16h4"/></svg>'};
 function load(src,done){const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>done&&done();s.onerror=()=>{console.warn('[GAMA] Cannot load '+src);done&&done()};document.head.appendChild(s)}
 function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(e){return ''}}
@@ -14,12 +14,15 @@ function retryOpen(kind,attempt){const catalog=kind==='catalog',fn=catalog?windo
 function openCatalog(){return retryOpen('catalog',0)}
 function open(){return retryOpen('requests',0)}
 function installMenuShortcut(){const client=role()==='client',manage=canManage();if(!client&&!manage)return;if(client||manage)ensureUnique('Catálogo de productos','gamaClientCatalogMenuCard',ICONS.catalog,openCatalog);if(manage)ensureUnique('Solicitudes de clientes','gamaCustomerRequestsMenuCard',ICONS.requests,open)}
-function install(){if(role()==='client'){const b=document.getElementById('clientCatalogTab');if(b){b.classList.remove('aclHidden');b.style.display=''}}else if(canManage()){const b=document.getElementById('customerRequestsTab');if(b){b.classList.remove('aclHidden');b.style.display=''}}installMenuShortcut()}
+function installMenuDelegation(){const host=document.getElementById('mainmenu');if(!host||menuClickHost===host)return;if(menuClickHost)menuClickHost.removeEventListener('click',menuClickHandler,true);menuClickHost=host;host.addEventListener('click',menuClickHandler,true)}
+function menuClickHandler(e){const b=e.target?.closest?.('button');if(!b||!b.closest('#mainmenu'))return;const t=textOf(b);if(t==='catálogo de productos'){e.preventDefault();e.stopPropagation();openCatalog();return}if(t==='solicitudes de clientes'){e.preventDefault();e.stopPropagation();open()}}
+function install(){installMenuDelegation();if(role()==='client'){const b=document.getElementById('clientCatalogTab');if(b){b.classList.remove('aclHidden');b.style.display=''}}else if(canManage()){const b=document.getElementById('customerRequestsTab');if(b){b.classList.remove('aclHidden');b.style.display=''}}installMenuShortcut()}
 function scheduleInstall(){[0,50,150,350,700,1200].forEach(ms=>setTimeout(install,ms))}
 window.GamaInstallClientRequests=install;window.GamaOpenClientRequests=open;
 function observeMenu(){const host=document.getElementById('mainmenu');if(host&&!menuObserver){menuObserver=new MutationObserver(()=>scheduleInstall());menuObserver.observe(host,{childList:true,subtree:true});scheduleInstall()}}
 function hookShowTab(){if(typeof window.showTab!=='function'||window.showTab.__gamaClientShortcutHook)return;const original=window.showTab;const wrapped=function(){const r=original.apply(this,arguments);if(arguments[0]==='mainmenu')scheduleInstall();return r};wrapped.__gamaClientShortcutHook=true;window.showTab=wrapped}
-function boot(){if(loading)return;loading=true;let pending=2,done=()=>{if(--pending<=0){loading=false;install();observeMenu();hookShowTab();scheduleInstall()}};if(!document.querySelector('script[src*="gama-customer-requests.js"]'))load('gama-customer-requests.js?v=20260902-1',done);else done();if(!document.querySelector('script[src*="gama-client-catalog.js"]'))load('gama-client-catalog.js?v=20260902-1',done);else done();if(!bodyObserver){bodyObserver=new MutationObserver(()=>{observeMenu();hookShowTab()});bodyObserver.observe(document.body,{childList:true})}}
+function boot(){if(loading)return;loading=true;let pending=2,done=()=>{if(--pending<=0){loading=false;install();observeMenu();hookShowTab();scheduleInstall()}};if(!document.querySelector('script[src*="gama-customer-requests.js"]'))load('gama-customer-requests.js?v=20260902-2',done);else done();if(!document.querySelector('script[src*="gama-client-catalog.js"]'))load('gama-client-catalog.js?v=20260902-2',done);else done();if(!bodyObserver){bodyObserver=new MutationObserver(()=>{observeMenu();installMenuDelegation();hookShowTab()});bodyObserver.observe(document.body,{childList:true})}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.addEventListener('gama:client-authenticated',()=>scheduleInstall());
+window.addEventListener('pageshow',()=>scheduleInstall());
 })();
