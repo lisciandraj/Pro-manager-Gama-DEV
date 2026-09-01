@@ -1,6 +1,10 @@
 /* GAMA DEV — compatibility bridge for access control -> cloud catalogue / customer requests */
 (function(){'use strict';
 let loading=false;
+const ICONS={
+  catalog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.5h2l1.7 9.2a1.8 1.8 0 0 0 1.8 1.5h7.8a1.8 1.8 0 0 0 1.7-1.3L20.2 9H7"/><path d="M9 20a1.2 1.2 0 1 0 0-2.4A1.2 1.2 0 0 0 9 20Zm8.2 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/><path d="M10 9.5v3m3-3v3m3-3v3"/></svg>',
+  requests:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3.5" width="12" height="17" rx="1.8"/><path d="M9 3.5h6v2H9zM9 9h6M9 12.5h6M9 16h4"/></svg>'
+};
 function load(src,done){const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>done&&done();s.onerror=()=>console.warn('[GAMA] Cannot load '+src);document.head.appendChild(s)}
 function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(e){return ''}}
 function canManage(){return ['admin','commercial'].includes(role())}
@@ -27,8 +31,8 @@ function installMenuShortcut(){
   const client=role()==='client',manage=canManage();
   if(!client&&!manage)return;
   getGrids().forEach(grid=>{
-    addMenuCard(grid,'gamaClientCatalogMenuCard','🛒','Catálogo de productos',openCatalog);
-    if(manage)addMenuCard(grid,'gamaCustomerRequestsMenuCard','📋','Solicitudes de clientes',open);
+    addMenuCard(grid,'gamaClientCatalogMenuCard',ICONS.catalog,'Catálogo de productos',openCatalog);
+    if(manage)addMenuCard(grid,'gamaCustomerRequestsMenuCard',ICONS.requests,'Solicitudes de clientes',open);
   });
 }
 function install(){
