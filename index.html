@@ -254,6 +254,8 @@
 <section id="barcode"><div class="pageBack"><button onclick="showTab(\'mainmenu\',null)">‹ Menú principal</button></div><div class="card"><h2>🏷️ Generador de códigos de barras</h2><label>Tipo</label><select id="barcodeType"><option value="CODE39">Code 39 — referencias internas</option><option value="EAN13">EAN-13 — GTIN</option></select><label>Referencia / número</label><input id="barcodeValue" placeholder="Ej. PROD-00001"><button class="primary" style="width:100%;margin-top:10px" onclick="generateBarcode()">🏷️ Generar</button><button class="secondary" style="width:100%;margin-top:8px" onclick="window.print()">🖨️ Imprimir etiqueta</button><div class="barcodebox"><svg id="barcodeSvg"></svg><div id="barcodeText"></div><div id="barcodeError" class="low"></div></div></div></section>
 
 </div>
+<script src="gama-client-catalog.js?v=7"></script>
+<script src="gama-customer-requests.js?v=4"></script>
 <script src="gama-menu-final2.js?v=6"></script>
 <script src="gama-scanner-phone.js?v=10"></script>
 <script src="gama-access-control.js?v=1"></script>
