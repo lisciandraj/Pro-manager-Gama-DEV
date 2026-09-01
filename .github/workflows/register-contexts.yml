@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 20
-      - name: Register context scripts in index
+      - name: Remove legacy inline core and register contexts
         run: |
           node <<'NODE'
           const fs = require('fs');
@@ -25,13 +25,15 @@ jobs:
           const files = ['gama-products.js','gama-clients.js','gama-inventory.js','gama-billing.js','gama-audit.js','gama-dashboard.js'];
           const marker = '<script src="gama-standard-ui.js?v=8"></script>';
           const tags = files.map(f => `<script src="${f}?v=1"></script>`).join('\n');
+          const legacyCorePattern = /\n?\s*<script\b[^>]*>\s*const\s+KEY\s*=\s*['"]stock_manager_v6_ecuador['"][\s\S]*?showTab\(['"]mainmenu['"],\s*null\);\s*<\/script>\s*/i;
+          html = html.replace(legacyCorePattern, '\n');
           if (!files.every(f => html.includes(`src="${f}?v=1"`))) {
             if (!html.includes(marker)) throw new Error('standard UI marker missing');
             html = html.replace(marker, `${tags}\n${marker}`);
-            fs.writeFileSync(p, html);
           }
+          fs.writeFileSync(p, html);
           NODE
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || (git commit -m "refactor: load bounded context modules" && git push)
+          git diff --cached --quiet || (git commit -m "refactor: remove legacy inline core" && git push)
