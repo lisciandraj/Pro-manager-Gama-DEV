@@ -8,7 +8,7 @@ const ICONS={
 function load(src,done){const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>done&&done();s.onerror=()=>console.warn('[GAMA] Cannot load '+src);document.head.appendChild(s)}
 function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(e){return ''}}
 function canManage(){return ['admin','commercial'].includes(role())}
-function getGrids(){return [...document.querySelectorAll('#mainmenu .gamaF2Grid,#mainmenu .appGrid,#mainmenu .gamaCleanGrid')].filter(Boolean)}
+function getGrids(){return [...document.querySelectorAll('#mainmenu .gamaF2Grid,#mainmenu .appGrid,#mainmenu .gamaCleanGrid,#mainmenu .gamaMenuGrid')].filter(Boolean)}
 function addMenuCard(grid,id,icon,title,action){
   if(document.getElementById(id))return;
   const card=document.createElement('button');
@@ -17,6 +17,10 @@ function addMenuCard(grid,id,icon,title,action){
     card.className='gamaCleanCard';
     card.innerHTML='<span class="gamaCleanIcon" aria-hidden="true">'+icon+'</span><span class="gamaCleanTitle"></span>';
     card.querySelector('.gamaCleanTitle').textContent=title;
+  }else if(grid.classList.contains('gamaMenuGrid')){
+    card.className='gamaMenuCard';
+    card.innerHTML='<span class="gamaMenuIcon" aria-hidden="true">'+icon+'</span><span class="gamaMenuTitle"></span>';
+    card.querySelector('.gamaMenuTitle').textContent=title;
   }else{
     card.className=grid.classList.contains('appGrid')?'appTile':'gamaF2Card';
     if(grid.classList.contains('appGrid')){
