@@ -9,7 +9,8 @@ let html = fs.readFileSync(indexPath, 'utf8');
 const original = html;
 
 // 1. Remove the legacy inline business core now provided by gama-legacy-core.js.
-const legacyCorePattern = /\n?\s*<script\b[^>]*>\s*const\s+KEY\s*=\s*['"]stock_manager_v6_ecuador['"][\s\S]*?renderAll\(\);\s*showTab\(['"]mainmenu['"],\s*null\);\s*<\/script>\s*/i;
+// Match the actual legacy block by its stable KEY declaration and terminal boot call.
+const legacyCorePattern = /\n?\s*<script\b[^>]*>\s*const\s+KEY\s*=\s*['"]stock_manager_v6_ecuador['"][\s\S]*?showTab\(['"]mainmenu['"],\s*null\);\s*<\/script>\s*/i;
 html = html.replace(legacyCorePattern, '\n');
 
 // 2. Remove the repeated legacy barcode MutationObserver compatibility blocks.
