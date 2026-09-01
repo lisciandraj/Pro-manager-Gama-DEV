@@ -24,7 +24,7 @@
     const modules=['gama-cloud-auth.js?v=20','gama-cloud-products.js?v=19','gama-cloud-users.js?v=18','gama-purchases-supplier-bridge.js?v=6','gama-invoice-archive.js?v=3','gama-client-catalog.js?v=6','gama-customer-requests.js?v=4'];
     for(const src of modules){const base=src.split('?')[0];if(document.querySelector('script[src^="'+base+'"]'))continue;await new Promise(resolve=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>{console.warn('[GAMA] Module unavailable:',src);resolve()};document.head.appendChild(s)})}
     emit('gama:auth-ready');
-    const cs=document.createElement('script');cs.src='gama-central-sync.js?v=2';cs.async=true;cs.onload=()=>emit('gama:data-ready');cs.onerror=()=>console.warn('[GAMA] Central sync unavailable');document.head.appendChild(cs);
+    if(!document.querySelector('script[src^="gama-central-sync.js"]')){const cs=document.createElement('script');cs.src='gama-central-sync.js?v=2';cs.async=true;cs.onload=()=>emit('gama:data-ready');cs.onerror=()=>console.warn('[GAMA] Central sync unavailable');document.head.appendChild(cs)}else emit('gama:data-ready');
     return window.GamaCloud;
   }).catch(e=>{console.error('[GAMA] Cloud initialization failed',e);emit('gama:cloud-status',{ready:false,error:e})});
 })();
