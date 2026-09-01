@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+// Deterministic, idempotent migration for the legacy index.html monolith.
 const indexPath = 'index.html';
 const cssPath = 'gama-core.css';
 
@@ -16,7 +17,7 @@ html = html.replace(barcodeObserverPattern, '\n');
 
 // 3. Move all inline CSS into one external stylesheet, preserving cascade order.
 const styles = [];
-html = html.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_match, css, offset) => {
+html = html.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_match, css) => {
   styles.push(`/* Original inline style block ${styles.length + 1} */\n${css.trim()}\n`);
   return `\n<!-- CSS extracted by GAMA index refactor -->\n`;
 });
