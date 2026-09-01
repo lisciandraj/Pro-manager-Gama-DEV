@@ -17,6 +17,11 @@ async function loginIfConfigured(page) {
   await expect(page.locator('#mainmenu')).toBeVisible({ timeout: 15_000 });
 }
 
+async function returnToMenu(page) {
+  await page.getByRole('button', { name: /Menú principal/i }).first().click();
+  await expect(page.locator('#mainmenu')).toBeVisible();
+}
+
 test('application loads without uncaught page errors', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -37,21 +42,19 @@ test('authenticated navigation remains stable and has no duplicate client entrie
   await expect(requests).toHaveCount(1);
 
   await catalog.click();
-  await expect(page.locator('#clientCatalogTab, [data-gama-client-catalog]').first()).toBeVisible({ timeout: 10_000 });
-  await page.getByRole('button', { name: /Menú principal/i }).click();
-  await expect(menu).toBeVisible();
+  await expect(page.locator('#client-catalog')).toBeVisible({ timeout: 10_000 });
+  await returnToMenu(page);
   await expect(menu.locator('[data-gama-module="client-catalog"]')).toHaveCount(1);
 
   await requests.click();
-  await expect(page.locator('#customerRequestsTab, [data-gama-customer-requests]').first()).toBeVisible({ timeout: 10_000 });
-  await page.getByRole('button', { name: /Menú principal/i }).click();
-  await expect(menu).toBeVisible();
+  await expect(page.locator('#customer-requests')).toBeVisible({ timeout: 10_000 });
+  await returnToMenu(page);
   await expect(menu.locator('[data-gama-module="customer-requests"]')).toHaveCount(1);
 
   await catalog.click();
-  await expect(page.locator('#clientCatalogTab, [data-gama-client-catalog]').first()).toBeVisible({ timeout: 10_000 });
-  await page.getByRole('button', { name: /Menú principal/i }).click();
-  await expect(menu).toBeVisible();
+  await expect(page.locator('#client-catalog')).toBeVisible({ timeout: 10_000 });
+  await returnToMenu(page);
+
   await expect(menu.locator('[data-gama-module="client-catalog"]')).toHaveCount(1);
   await expect(menu.locator('[data-gama-module="customer-requests"]')).toHaveCount(1);
 });
