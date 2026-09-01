@@ -8,16 +8,22 @@ const ICONS={
 function load(src,done){const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>done&&done();s.onerror=()=>console.warn('[GAMA] Cannot load '+src);document.head.appendChild(s)}
 function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(e){return ''}}
 function canManage(){return ['admin','commercial'].includes(role())}
-function getGrids(){return [...document.querySelectorAll('#mainmenu .gamaF2Grid,#mainmenu .appGrid')].filter(Boolean)}
+function getGrids(){return [...document.querySelectorAll('#mainmenu .gamaF2Grid,#mainmenu .appGrid,#mainmenu .gamaCleanGrid')].filter(Boolean)}
 function addMenuCard(grid,id,icon,title,action){
   if(document.getElementById(id))return;
   const card=document.createElement('button');
   card.type='button';card.id=id;
-  card.className=grid.classList.contains('appGrid')?'appTile':'gamaF2Card';
-  if(grid.classList.contains('appGrid')){
-    card.innerHTML='<span class="appIcon teal">'+icon+'</span><b>'+title+'</b><small>Acceso directo</small>';
+  if(grid.classList.contains('gamaCleanGrid')){
+    card.className='gamaCleanCard';
+    card.innerHTML='<span class="gamaCleanIcon" aria-hidden="true">'+icon+'</span><span class="gamaCleanTitle"></span>';
+    card.querySelector('.gamaCleanTitle').textContent=title;
   }else{
-    card.innerHTML='<span class="gamaF2Icon">'+icon+'</span><span class="gamaF2Title">'+title+'</span>';
+    card.className=grid.classList.contains('appGrid')?'appTile':'gamaF2Card';
+    if(grid.classList.contains('appGrid')){
+      card.innerHTML='<span class="appIcon teal">'+icon+'</span><b>'+title+'</b><small>Acceso directo</small>';
+    }else{
+      card.innerHTML='<span class="gamaF2Icon">'+icon+'</span><span class="gamaF2Title">'+title+'</span>';
+    }
   }
   card.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();action(e)},{passive:false});
   grid.appendChild(card);
@@ -25,13 +31,14 @@ function addMenuCard(grid,id,icon,title,action){
 function openCatalog(){
   const b=document.getElementById('clientCatalogTab');
   if(b){b.click();return true}
-  install();setTimeout(()=>document.getElementById('clientCatalogTab')?.click(),250);return true;
+  if(window.GamaInstallClientRequests)window.GamaInstallClientRequests();
+  setTimeout(()=>document.getElementById('clientCatalogTab')?.click(),250);return true;
 }
 function installMenuShortcut(){
   const client=role()==='client',manage=canManage();
   if(!client&&!manage)return;
   getGrids().forEach(grid=>{
-    addMenuCard(grid,'gamaClientCatalogMenuCard',ICONS.catalog,'Catálogo de productos',openCatalog);
+    if(client)addMenuCard(grid,'gamaClientCatalogMenuCard',ICONS.catalog,'Catálogo de productos',openCatalog);
     if(manage)addMenuCard(grid,'gamaCustomerRequestsMenuCard',ICONS.requests,'Solicitudes de clientes',open);
   });
 }
