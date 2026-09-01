@@ -38,7 +38,7 @@ function installMenuShortcut(){
   const client=role()==='client',manage=canManage();
   if(!client&&!manage)return;
   getGrids().forEach(grid=>{
-    if(client)addMenuCard(grid,'gamaClientCatalogMenuCard',ICONS.catalog,'Catálogo de productos',openCatalog);
+    if(client||manage)addMenuCard(grid,'gamaClientCatalogMenuCard',ICONS.catalog,'Catálogo de productos',openCatalog);
     if(manage)addMenuCard(grid,'gamaCustomerRequestsMenuCard',ICONS.requests,'Solicitudes de clientes',open);
   });
 }
