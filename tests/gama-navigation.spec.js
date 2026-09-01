@@ -146,7 +146,7 @@ test('client catalog can be opened repeatedly without duplicates', async ({ page
     await expect(page.locator('#client-catalog')).toHaveClass(/active/);
     await expect(page.locator('#client-catalog')).toHaveCount(1);
     await returnToMenu(page);
-    await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]`)).toHaveCount(1);
+    await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]')).toHaveCount(1);
   }
 });
 
@@ -158,7 +158,7 @@ test('customer requests can be opened repeatedly without duplicates', async ({ p
     await expect(page.locator('#customer-requests')).toHaveClass(/active/);
     await expect(page.locator('#customer-requests')).toHaveCount(1);
     await returnToMenu(page);
-    await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]`)).toHaveCount(1);
+    await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]')).toHaveCount(1);
   }
 });
 
@@ -170,6 +170,6 @@ test('catalog and customer requests remain unique after alternating navigation',
     await expect(page.locator(`#${moduleId}`)).toHaveClass(/active/);
     await returnToMenu(page);
   }
-  await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]`)).toHaveCount(1);
-  await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]`)).toHaveCount(1);
+  await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]')).toHaveCount(1);
+  await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]')).toHaveCount(1);
 });
