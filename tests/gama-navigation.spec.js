@@ -47,7 +47,7 @@ test('authenticated session exposes a valid GAMA role', async ({ page }) => {
   await requireAuth(page);
   const session = await page.evaluate(() => JSON.parse(localStorage.getItem('gama_session_v1') || 'null'));
   expect(session).toBeTruthy();
-  expect(['admin', 'commercial', 'magasinier', 'client', 'administrador', 'comercial', 'almacenero']).toContain(session.role);
+  expect(['admin', 'commercial', 'magasinier', 'client']).toContain(session.role);
 });
 
 test('authenticated main menu exposes unique modules', async ({ page }) => {
@@ -81,8 +81,8 @@ test('product and client modules expose their data-entry interfaces', async ({ p
 
   await openModule(page, 'products');
   await expect(page.locator('#products')).toHaveClass(/active/);
-  await expect(page.locator('#products input, #products select, #products textarea')).toHaveCount(1, { timeout: 5_000 }).catch(() => {});
   expect(await page.locator('#products button').count()).toBeGreaterThan(0);
+  expect(await page.locator('#products input, #products select, #products textarea').count()).toBeGreaterThan(0);
   await returnToMenu(page);
 
   await openModule(page, 'clients');
@@ -119,7 +119,7 @@ test('client catalog exposes search, cart and submit controls', async ({ page })
   await expect(page.locator('#ccSend')).toBeVisible();
   await expect(page.locator('#ccTotal')).toBeVisible();
   await page.locator('#ccSearch').fill('producto-e2e-inexistente');
-  await expect(page.locator('#ccProducts')).toContainText(/Aucun produit trouvé|Ningún producto encontrado|No hay productos encontrados/i);
+  await expect(page.locator('#ccProducts')).toContainText(/Aucun produit trouvé/i);
   await page.locator('#ccSend').click();
   await expect(page.locator('#ccMsg')).toContainText(/Añada al menos un producto/i);
   await returnToMenu(page);
@@ -134,7 +134,7 @@ test('customer request module exposes search and request detail workflow', async
   await expect(page.locator('#crCount')).toBeVisible();
   await expect(page.locator('#crRows')).toBeVisible();
   await page.locator('#crSearch').fill('solicitud-e2e-inexistente');
-  await expect(page.locator('#crRows')).toContainText(/No hay solicitudes de clientes|Impossible de charger/i);
+  await expect(page.locator('#crRows')).toContainText(/No hay solicitudes de clientes|Impossible de charger les solicitudes/i);
   await returnToMenu(page);
 });
 
@@ -146,7 +146,7 @@ test('client catalog can be opened repeatedly without duplicates', async ({ page
     await expect(page.locator('#client-catalog')).toHaveClass(/active/);
     await expect(page.locator('#client-catalog')).toHaveCount(1);
     await returnToMenu(page);
-    await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]')).toHaveCount(1);
+    await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]`)).toHaveCount(1);
   }
 });
 
@@ -158,7 +158,7 @@ test('customer requests can be opened repeatedly without duplicates', async ({ p
     await expect(page.locator('#customer-requests')).toHaveClass(/active/);
     await expect(page.locator('#customer-requests')).toHaveCount(1);
     await returnToMenu(page);
-    await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]')).toHaveCount(1);
+    await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]`)).toHaveCount(1);
   }
 });
 
