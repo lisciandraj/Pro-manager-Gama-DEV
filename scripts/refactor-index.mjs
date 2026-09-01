@@ -3,6 +3,7 @@ import fs from 'node:fs';
 // Deterministic, idempotent migration for the legacy index.html monolith.
 const indexPath = 'index.html';
 const cssPath = 'gama-core.css';
+const contextScripts = ['gama-products.js','gama-clients.js','gama-inventory.js','gama-billing.js','gama-audit.js','gama-dashboard.js'];
 
 let html = fs.readFileSync(indexPath, 'utf8');
 const original = html;
@@ -41,6 +42,15 @@ if (!/gama-legacy-core\.js\?v=1/.test(html)) {
   html = html.replace(standardUi, '<script src="gama-legacy-core.js?v=1"></script>\n' + standardUi);
 }
 
+// 6. Register bounded-context facades after the legacy runtime and before UI patching.
+const standardUi = '<script src="gama-standard-ui.js?v=8"></script>';
+const contextTags = contextScripts.map(name => `<script src="${name}?v=1"></script>`).join('\n');
+const missingContext = contextScripts.some(name => !html.includes(`src="${name}?v=1"`));
+if (missingContext) {
+  if (!html.includes(standardUi)) throw new Error('Expected standard UI script tag not found');
+  html = html.replace(standardUi, `${contextTags}\n${standardUi}`);
+}
+
 // Remove excessive blank lines introduced by block removal.
 html = html.replace(/\n{4,}/g, '\n\n\n');
 
@@ -50,4 +60,4 @@ if (html === original) {
 }
 
 fs.writeFileSync(indexPath, html, 'utf8');
-console.log(`Refactored ${indexPath}; extracted ${styles.length} CSS block(s).`);
+console.log(`Refactored ${indexPath}; extracted ${styles.length} CSS block(s) and registered ${contextScripts.length} bounded contexts.`);
