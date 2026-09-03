@@ -13,18 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Patch index navigation
+      - name: Patch index navigation and cache versions
         run: |
           node <<'NODE'
           const fs=require('fs');
           const p='index.html';
           let h=fs.readFileSync(p,'utf8');
-          const marker='<script src="gama-menu-final2.js?v=6"></script>';
-          const tags='<script src="gama-client-catalog.js?v=7"></script>\n<script src="gama-customer-requests.js?v=4"></script>\n'+marker;
-          if(!h.includes('gama-client-catalog.js?v=7')) h=h.replace(marker,tags);
+          const menuOld='<script src="gama-menu-final2.js?v=6"></script>';
+          const menuNew='<script src="gama-menu-final2.js?v=7"></script>';
+          const excelLoaderOld='<script src="gama-excel-module-loader.js?v=5"></script>';
+          const excelLoaderNew='<script src="gama-excel-module-loader.js?v=6"></script>';
+          const excelOld='<script src="gama-excel-import.js?v=4"></script>';
+          const excelNew='<script src="gama-excel-import.js?v=5"></script>';
+          const tags='<script src="gama-client-catalog.js?v=7"></script>\n<script src="gama-customer-requests.js?v=4"></script>\n'+menuNew;
+          if(!h.includes('gama-client-catalog.js?v=7')) h=h.replace(menuOld,tags);
+          h=h.replace(menuOld,menuNew).replace(excelLoaderOld,excelLoaderNew).replace(excelOld,excelNew);
           fs.writeFileSync(p,h);
           NODE
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || (git commit -m "fix: preload catalog and customer requests" && git push)
+          git diff --cached --quiet || (git commit -m "fix: refresh Excel and navigation modules" && git push)
