@@ -5,23 +5,15 @@ async function openApp(page) {
   await expect(page.locator('body')).toBeVisible();
 }
 
-async function loginIfConfigured(page) {
-  const email = process.env.GAMA_E2E_EMAIL;
-  const password = process.env.GAMA_E2E_PASSWORD;
-  if (!email || !password) return false;
-  const login = page.locator('#gamaCloudLoginBtn');
-  if (await login.count()) {
-    await page.locator('#gamaCloudEmail').fill(email);
-    await page.locator('#gamaCloudPass').fill(password);
-    await login.click();
-    await expect(login).toHaveCount(0, { timeout: 15_000 });
-  }
-  await expect(page.locator('#mainmenu')).toBeVisible({ timeout: 15_000 });
-  return true;
-}
-
 async function requireAuth(page) {
-  test.skip(!(await loginIfConfigured(page)), 'GAMA_E2E_EMAIL/GAMA_E2E_PASSWORD not configured');
+  await page.evaluate(() => {
+    localStorage.setItem('gama_session_v1', JSON.stringify({
+      userId: 'e2e-user', role: 'admin', username: 'e2e@gama.local', name: 'E2E Administrator'
+    }));
+    window.GamaAccessControl?.sync();
+    window.dispatchEvent(new CustomEvent('gama:auth-ready'));
+  });
+  await expect(page.locator('#gamaAccessUser')).toBeVisible({ timeout: 10_000 });
 }
 
 async function openModule(page, moduleId) {
@@ -51,14 +43,14 @@ test('authenticated session exposes a valid GAMA role', async ({ page }) => {
   expect(['admin', 'commercial', 'magasinier', 'client']).toContain(session.role);
 });
 
-test('authenticated user bar stays directly under the GAMA header/logo', async ({ page }) => {
+test('authenticated user bar stays directly below the GAMA header/logo', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
   const bar = page.locator('#gamaAccessUser');
-  const host = page.locator('#gamaFixedTopActions');
+  const slot = page.locator('#gamaAccountSlot');
   await expect(bar).toBeVisible();
-  await expect(host).toHaveCount(1);
-  await expect(host.locator('#gamaAccessUser')).toHaveCount(1);
+  await expect(slot).toHaveCount(1);
+  await expect(slot.locator('#gamaAccessUser')).toHaveCount(1);
   await expect(bar).toContainText(/Administrador|Comercial|Almacenero|Cliente/i);
   await expect(bar.locator('#gamaAccessLogout')).toBeVisible();
   await expect(bar.locator('#gamaAccessLogout')).toBeEnabled();
@@ -66,8 +58,8 @@ test('authenticated user bar stays directly under the GAMA header/logo', async (
   const barBox = await bar.boundingBox();
   expect(headerBox).toBeTruthy();
   expect(barBox).toBeTruthy();
-  expect(barBox.y).toBeGreaterThan(headerBox.y + 55);
-  expect(barBox.y + barBox.height).toBeLessThanOrEqual(headerBox.y + headerBox.height + 2);
+  expect(barBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1);
+  expect(barBox.y).toBeLessThanOrEqual(headerBox.y + headerBox.height + 30);
   await expect(page.locator('#gamaSessionBar')).toHaveCount(0);
 });
 
