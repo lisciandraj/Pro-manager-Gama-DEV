@@ -19,12 +19,12 @@ jobs:
           const fs=require('fs');
           const p='index.html';
           let h=fs.readFileSync(p,'utf8');
-          const menuOld='<script src="gama-menu-final2.js?v=6"></script>';
-          const menuNew='<script src="gama-menu-final2.js?v=7"></script>';
-          const excelLoaderOld='<script src="gama-excel-module-loader.js?v=5"></script>';
-          const excelLoaderNew='<script src="gama-excel-module-loader.js?v=6"></script>';
-          const excelOld='<script src="gama-excel-import.js?v=4"></script>';
-          const excelNew='<script src="gama-excel-import.js?v=5"></script>';
+          const menuOld='<script src="gama-menu-final2.js?v=7"></script>';
+          const menuNew='<script src="gama-menu-final2.js?v=8"></script>';
+          const excelLoaderOld='<script src="gama-excel-module-loader.js?v=6"></script>';
+          const excelLoaderNew='<script src="gama-excel-module-loader.js?v=7"></script>';
+          const excelOld='<script src="gama-excel-import.js?v=5"></script>';
+          const excelNew='<script src="gama-excel-import.js?v=6"></script>';
           const tags='<script src="gama-client-catalog.js?v=7"></script>\n<script src="gama-customer-requests.js?v=4"></script>\n'+menuNew;
           if(!h.includes('gama-client-catalog.js?v=7')) h=h.replace(menuOld,tags);
           h=h.replace(menuOld,menuNew).replace(excelLoaderOld,excelLoaderNew).replace(excelOld,excelNew);
