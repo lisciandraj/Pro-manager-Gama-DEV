@@ -93,11 +93,11 @@
     if(!token)throw Error('Sesión administrador no disponible.');
     button.disabled=true;button.textContent='Creando…';status.textContent='';
     try{
-      const response=await fetch(window.GamaCloud.url+'/functions/v1/gama-admin-users',{method:'POST',headers:{Authorization:'Bearer '+token,apikey:window.GamaCloud.publishableKey||'sb_publishable_4l0vZw61u5EbLkzmrqrf6Q_phOL1Be9', 'Content-Type':'application/json'},body:JSON.stringify({full_name,email,password,role})});
+      const response=await fetch(window.GamaCloud.url+'/functions/v1/gama-admin-users',{method:'POST',headers:{Authorization:'Bearer '+token,apikey:window.GamaCloud.publishableKey||'sb_publishable_4l0vZw61u5EbLkzmrqrf6Q_phOL1Be9','Content-Type':'application/json'},body:JSON.stringify({full_name,email,password,role})});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw Error(data.message||data.error||'No se pudo crear la cuenta.');
       status.textContent='Cuenta creada correctamente: '+data.full_name+' · '+LABEL[data.role];status.style.color='#138a69';
-      form.reset();
+      form.querySelector('[name="full_name"]').value='';form.querySelector('[name="email"]').value='';form.querySelector('[name="password"]').value='';form.querySelector('[name="role"]').value='cliente';
       await refreshAdminTable();
       return true;
     }finally{button.disabled=false;button.textContent='Crear cuenta'}
@@ -119,7 +119,8 @@
     await refreshAdminTable();
   }
   function init(){
-    if(started)return;started=true;window.GamaCloudAuth={ensure,login,createCloudAccount};
+    if(started)return;started=true;window.GamaCloudAuth={ensure,login,createCloudAccount,openAdminPanel:adminPanel};
+    window.addEventListener('gama:auth-ready',()=>adminButton());
     window.addEventListener('gama:auth-change',async e=>{
       if(e.detail?.event==='SIGNED_OUT'){localStorage.removeItem('gama_session_v1');document.getElementById('gamaCloudAdminBtn')?.remove();showLogin();return}
       if(e.detail?.session){await ensure();adminButton()}
