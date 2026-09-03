@@ -43,24 +43,55 @@ test('authenticated session exposes a valid GAMA role', async ({ page }) => {
   expect(['admin', 'commercial', 'magasinier', 'client']).toContain(session.role);
 });
 
-test('authenticated user bar stays directly below the GAMA header/logo', async ({ page }) => {
+test('mobile GAMA layout matches the reference header and account placement', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await openApp(page);
   await requireAuth(page);
-  const bar = page.locator('#gamaAccessUser');
+
+  const header = page.locator('header.gamaHeader');
   const slot = page.locator('#gamaAccountSlot');
-  await expect(bar).toBeVisible();
+  const bar = page.locator('#gamaAccessUser');
+  const cloud = page.locator('#gamaCloudAdminBtn');
+
+  await expect(header).toBeVisible();
   await expect(slot).toHaveCount(1);
+  await expect(bar).toBeVisible();
   await expect(slot.locator('#gamaAccessUser')).toHaveCount(1);
   await expect(bar).toContainText(/Administrador|Comercial|Almacenero|Cliente/i);
   await expect(bar.locator('#gamaAccessLogout')).toBeVisible();
   await expect(bar.locator('#gamaAccessLogout')).toBeEnabled();
-  const headerBox = await page.locator('header.gamaHeader').boundingBox();
+  await expect(page.locator('#gamaSessionBar')).toHaveCount(0);
+  await expect(cloud).toBeVisible();
+  await expect(header.locator('#gamaCloudAdminBtn')).toHaveCount(1);
+
+  const headerBox = await header.boundingBox();
   const barBox = await bar.boundingBox();
   expect(headerBox).toBeTruthy();
   expect(barBox).toBeTruthy();
   expect(barBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1);
   expect(barBox.y).toBeLessThanOrEqual(headerBox.y + headerBox.height + 30);
-  await expect(page.locator('#gamaSessionBar')).toHaveCount(0);
+
+  const cards = page.locator('#mainmenu .gamaF2Card');
+  await expect(cards).toHaveCount(17);
+  const expected = [
+    'Panel de control','Productos','Clientes','Entradas / Salidas','Facturación',
+    'Inventario','Auditoría','Proveedores','Compras','Matriz comercial',
+    'Importar Excel','Configuración','Copias de seguridad','Usuarios',
+    'Códigos de barras','Catálogo de productos','Solicitudes de clientes'
+  ];
+  await expect(cards.evaluateAll(nodes => nodes.map(n => n.textContent.trim()))).resolves.toEqual(expected);
+
+  const first = await cards.nth(0).boundingBox();
+  const second = await cards.nth(1).boundingBox();
+  const third = await cards.nth(2).boundingBox();
+  expect(first).toBeTruthy();
+  expect(second).toBeTruthy();
+  expect(third).toBeTruthy();
+  expect(Math.abs(first.y - second.y)).toBeLessThan(3);
+  expect(third.y).toBeGreaterThan(first.y + first.height - 3);
+  expect(first.width).toBeGreaterThan(150);
+  expect(first.height).toBeGreaterThanOrEqual(230);
+  expect(first.width / first.height).toBeLessThan(1.8);
 });
 
 test('logout removes the header user bar and returns to cloud login', async ({ page }) => {
