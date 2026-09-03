@@ -1,4 +1,4 @@
-/* GAMA — Navigation centrale v2 */
+/* GAMA — Navigation centrale v3: mobile-first menu matching GAMA reference */
 (function () {
   'use strict';
   if (window.GamaMenu) return;
@@ -22,45 +22,81 @@
     request:'<rect x="6" y="3.5" width="12" height="17" rx="1.8"/><path d="M9 3.5h6v2H9zM9 9h6M9 12.5h6M9 16h4"/>'
   };
 
+  // Order intentionally mirrors the requested reference layout.
   const ITEMS = [
-    ['Panel de control','dashboard','chart','*'],['Productos','products','cube','*'],['Clientes','clients','users','admin,commercial'],
-    ['Entradas / Salidas','movement','move','admin,commercial,magasinier'],['Facturación','billing','invoice','admin,commercial'],['Inventario','stock','stock','admin,commercial,magasinier'],
-    ['Auditoría','audit','audit','admin'],['Proveedores','suppliers','truck','admin,commercial'],['Compras','gamaPurchasesV14','cart','admin,commercial'],
-    ['Importar Excel','reports','sheet','admin,commercial'],['Configuración','settings','gear','admin'],['Copias de seguridad','backup','cloud','admin'],
-    ['Usuarios','users','user','admin'],['Códigos de barras','barcode','barcode','admin,commercial,magasinier'],['Catálogo de productos','client-catalog','catalog','admin,commercial,client'],
+    ['Panel de control','dashboard','chart','*'],
+    ['Productos','products','cube','*'],
+    ['Clientes','clients','users','admin,commercial'],
+    ['Entradas / Salidas','movement','move','admin,commercial,magasinier'],
+    ['Facturación','billing','invoice','admin,commercial'],
+    ['Inventario','stock','stock','admin,commercial,magasinier'],
+    ['Auditoría','audit','audit','admin'],
+    ['Proveedores','suppliers','truck','admin,commercial'],
+    ['Compras','gamaPurchasesV14','cart','admin,commercial'],
+    ['Matriz comercial','reports','chart','admin,commercial'],
+    ['Importar Excel','excel-import','sheet','admin,commercial','reports'],
+    ['Configuración','settings','gear','admin'],
+    ['Copias de seguridad','backup','cloud','admin'],
+    ['Usuarios','users','user','admin'],
+    ['Códigos de barras','barcode','barcode','admin,commercial,magasinier'],
+    ['Catálogo de productos','client-catalog','catalog','admin,commercial,client'],
     ['Solicitudes de clientes','customer-requests','request','admin,commercial']
   ];
 
   function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(_){return ''}}
   function allowed(rules){const r=role();return rules==='*'||rules.split(',').includes(r)}
 
-  // All modules use the same navigation path. Special modules are already
-  // preloaded; their open functions are used only to refresh their content.
   function open(id){
     if(typeof window.showTab!=='function') return false;
-    const ok=window.showTab(id,null);
+    const target=id==='excel-import'?'reports':id;
+    const ok=window.showTab(target,null);
     if(!ok) return false;
-    if(id==='client-catalog') window.GamaOpenClientCatalog?.();
-    if(id==='customer-requests') window.GamaOpenCustomerRequests?.();
+    if(target==='client-catalog') window.GamaOpenClientCatalog?.();
+    if(target==='customer-requests') window.GamaOpenCustomerRequests?.();
     return true;
   }
 
   function style(){
     if(document.getElementById('gamaMenuStyle'))return;
     const s=document.createElement('style');s.id='gamaMenuStyle';
-    s.textContent=`#mainmenu .gamaF2Grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:12px 18px 24px}#mainmenu .gamaF2Card{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;padding:18px 10px;margin:0;background:#fff;border:1px solid #e1e9ec;border-radius:18px;box-shadow:0 5px 18px #18324a12;color:#173246;cursor:pointer;transition:.15s}#mainmenu .gamaF2Card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #18324a18}#mainmenu .gamaF2Icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:18px;background:#e8f5f6;color:#087c8b;margin-bottom:12px}#mainmenu .gamaF2Icon svg{width:33px;height:33px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}#mainmenu .gamaF2Title{font-size:15px;font-weight:800;line-height:1.2;text-align:center}@media(max-width:900px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px}#mainmenu .gamaF2Card{min-height:140px;padding:14px 7px}}`;
+    s.textContent=`
+      #mainmenu{background:#f7f9fa!important;min-height:calc(100vh - 1px);padding-bottom:24px!important}
+      #mainmenu .gamaF2Heading{margin:28px 18px 6px!important;color:#173246!important;font-size:28px!important;line-height:1.12!important;font-weight:850!important;letter-spacing:-.5px!important}
+      #mainmenu .gamaF2Subheading{margin:0 18px 24px!important;color:#7b8992!important;font-size:15px!important;line-height:1.35!important}
+      #mainmenu .gamaF2Grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:0 18px 24px}
+      #mainmenu .gamaF2Card{appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:190px;padding:22px 12px;margin:0;background:#fff;border:1px solid #e4ebee;border-radius:22px;box-shadow:0 4px 18px #18324a0d;color:#173246;cursor:pointer;transition:transform .15s,box-shadow .15s}
+      #mainmenu .gamaF2Card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #18324a16}
+      #mainmenu .gamaF2Icon{display:flex;align-items:center;justify-content:center;width:82px;height:82px;border-radius:21px;background:#eaf6f7;color:#087c8b;margin-bottom:18px;flex:0 0 auto}
+      #mainmenu .gamaF2Icon svg{width:43px;height:43px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      #mainmenu .gamaF2Title{font-size:17px;font-weight:850;line-height:1.22;text-align:center;color:#173246}
+      @media(max-width:900px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 14px 22px}}
+      @media(max-width:600px){
+        #mainmenu .gamaF2Heading{margin:26px 18px 7px!important;font-size:29px!important}
+        #mainmenu .gamaF2Subheading{margin:0 18px 26px!important;font-size:15px!important}
+        #mainmenu .gamaF2Grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:0 14px 28px}
+        #mainmenu .gamaF2Card{min-height:246px;padding:18px 8px;border-radius:24px}
+        #mainmenu .gamaF2Icon{width:94px;height:94px;border-radius:22px;margin-bottom:20px}
+        #mainmenu .gamaF2Icon svg{width:50px;height:50px;stroke-width:1.7}
+        #mainmenu .gamaF2Title{font-size:17px;line-height:1.25}
+      }
+    `;
     document.head.appendChild(s)
   }
+
   function card(item){
     const b=document.createElement('button');b.type='button';b.className='gamaF2Card';b.dataset.gamaModule=item[1];
     const icon=document.createElement('span');icon.className='gamaF2Icon';icon.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[item[2]]+'</svg>';
-    const label=document.createElement('span');label.className='gamaF2Title';label.textContent=item[0];b.append(icon,label);b.onclick=()=>open(item[1]);return b
+    const label=document.createElement('span');label.className='gamaF2Title';label.textContent=item[0];
+    b.append(icon,label);b.onclick=()=>open(item[1]);return b
   }
+
   function render(){
     const host=document.getElementById('mainmenu');if(!host)return;style();const r=role();host.replaceChildren();
-    const h=document.createElement('h2');h.textContent='Menú principal';h.style.cssText='margin:22px 18px 8px;color:#173246;font-size:28px';
-    const p=document.createElement('p');p.textContent='Acceso rápido a las funciones de GAMA Stock Manager.';p.style.cssText='margin:0 18px 14px;color:#7b8891;font-size:14px';
-    const grid=document.createElement('div');grid.className='gamaF2Grid';if(r)ITEMS.filter(x=>allowed(x[3])).forEach(x=>grid.appendChild(card(x)));host.append(h,p,grid);window.dispatchEvent(new CustomEvent('gama:menu-ready'))
+    const h=document.createElement('h2');h.className='gamaF2Heading';h.textContent='Menú principal';
+    const p=document.createElement('p');p.className='gamaF2Subheading';p.textContent='Acceso rápido a las funciones de GAMA Stock Manager.';
+    const grid=document.createElement('div');grid.className='gamaF2Grid';
+    if(r)ITEMS.filter(x=>allowed(x[3])).forEach(x=>grid.appendChild(card(x)));
+    host.append(h,p,grid);window.dispatchEvent(new CustomEvent('gama:menu-ready'))
   }
   function init(){if(window.GamaMenu)return;window.GamaMenu={render,open};render();window.addEventListener('gama:auth-ready',render);window.addEventListener('gama:auth-change',()=>setTimeout(render,0))}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
