@@ -1,3 +1,4 @@
+// GAMA E2E navigation suite — Excel is a real navigable module.
 const { test, expect } = require('@playwright/test');
 
 const REAL_MODULES=['dashboard','products','clients','movement','billing','stock','audit','suppliers','gamaPurchasesV14','excel-import','settings','backup','users','barcode','client-catalog','customer-requests'];
