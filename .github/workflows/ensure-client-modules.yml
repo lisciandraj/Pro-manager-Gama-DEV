@@ -23,7 +23,8 @@ jobs:
           h=h.replace(/gama-excel-module-loader\.js\?v=\d+/,'gama-excel-module-loader.js?v=11');
           h=h.replace(/gama-excel-import\.js\?v=\d+/,'gama-excel-import.js?v=9');
           if(!h.includes('gama-client-catalog.js?v=7')){
-            h=h.replace(/(gama-menu-final2\.js\?v=10)/,'gama-client-catalog.js?v=7\n<script src="gama-customer-requests.js?v=4"></script>\n<script src="$1</script>');
+            h=h.replace(/<script src="gama-menu-final2\.js\?v=10"><\/script>/,
+              '<script src="gama-client-catalog.js?v=7"></script>\n<script src="gama-customer-requests.js?v=4"></script>\n$&');
           }
           fs.writeFileSync(p,h);
           NODE
