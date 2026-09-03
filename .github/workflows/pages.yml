@@ -23,6 +23,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Bust GAMA JS cache
         run: |
+          sed -i "s/gama-supabase.js?v=13/gama-supabase.js?v=${GITHUB_SHA}/g" index.html
           sed -i "s/gama-access-control.js?v=1/gama-access-control.js?v=${GITHUB_SHA}/g" index.html
           sed -i "s/gama-fixed-header.js?v=4/gama-fixed-header.js?v=${GITHUB_SHA}/g" index.html
           sed -i "s/gama-menu-final2.js?v=6/gama-menu-final2.js?v=${GITHUB_SHA}/g" index.html
