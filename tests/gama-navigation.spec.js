@@ -51,24 +51,24 @@ test('authenticated session exposes a valid GAMA role', async ({ page }) => {
   expect(['admin', 'commercial', 'magasinier', 'client']).toContain(session.role);
 });
 
-test('authenticated user bar shows identity, role and logout action', async ({ page }) => {
+test('authenticated user bar keeps the legacy top design and logout action', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
-  const bar = page.locator('#gamaSessionBar');
+  const bar = page.locator('#gamaACLUser');
   await expect(bar).toBeVisible();
-  await expect(bar).toContainText(/Conectado como:/i);
-  await expect(bar).toContainText(/Rol:/i);
-  await expect(bar.locator('#gamaSessionLogout')).toBeVisible();
-  await expect(bar.locator('#gamaSessionLogout')).toBeEnabled();
+  await expect(bar).toContainText(/Administrador|Comercial|Almacenero|Cliente/i);
+  await expect(bar.locator('#gamaAccessLogout')).toBeVisible();
+  await expect(bar.locator('#gamaAccessLogout')).toBeEnabled();
+  await expect(page.locator('#gamaSessionBar')).toHaveCount(0);
 });
 
-test('logout removes the session bar and returns to cloud login', async ({ page }) => {
+test('logout removes the legacy user bar and returns to cloud login', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
-  const logout = page.locator('#gamaSessionLogout');
+  const logout = page.locator('#gamaAccessLogout');
   await expect(logout).toBeVisible();
   await logout.click();
-  await expect(page.locator('#gamaSessionBar')).toHaveCount(0, { timeout: 15_000 });
+  await expect(page.locator('#gamaACLUser')).toHaveCount(0, { timeout: 15_000 });
   await expect(page.locator('#gamaCloudLogin')).toBeVisible({ timeout: 15_000 });
   const session = await page.evaluate(() => localStorage.getItem('gama_session_v1'));
   expect(session).toBeNull();
