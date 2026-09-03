@@ -15,7 +15,7 @@
   function style(){
     if(document.getElementById('gamaCloudAuthStyle'))return;
     const s=document.createElement('style');s.id='gamaCloudAuthStyle';
-    s.textContent=`#gamaCloudLogin{position:fixed;inset:0;z-index:100000;background:#f5f7fa;display:grid;place-items:center;padding:20px}#gamaCloudLogin .box{width:min(430px,100%);background:#fff;border:1px solid #e2e8ec;border-radius:22px;padding:28px;box-shadow:0 15px 45px #18324a18}#gamaCloudLogin h1{margin:0 0 5px;color:#18324a;font-size:25px}#gamaCloudLogin p{color:#71808a;font-size:13px;margin:5px 0 18px}#gamaCloudLogin label{display:block;font-weight:700;margin:8px 0 4px}#gamaCloudLogin input{width:100%;padding:12px;border:1px solid #d4e0e4;border-radius:9px;font-size:16px;box-sizing:border-box}#gamaCloudLogin button{width:100%;padding:12px;border:0;border-radius:9px;background:#087c8b;color:#fff;font-weight:800;margin-top:12px;cursor:pointer}#gamaCloudLogin button:disabled{opacity:.65;cursor:wait}.gamaCloudErr{margin-top:10px;background:#fff0ec;color:#c94f45;padding:10px;border-radius:8px;font-size:12px}.gamaCloudOk{margin-top:10px;background:#e7f6f0;color:#138a69;padding:10px;border-radius:8px;font-size:12px}`;
+    s.textContent=`#gamaCloudLogin{position:fixed;inset:0;z-index:100000;background:#f5f7fa;display:grid;place-items:center;padding:20px}#gamaCloudLogin .box{width:min(430px,100%);background:#fff;border:1px solid #e2e8ec;border-radius:22px;padding:28px;box-shadow:0 15px 45px #18324a18}#gamaCloudLogin h1{margin:0 0 5px;color:#18324a;font-size:25px}#gamaCloudLogin p{color:#71808a;font-size:13px;margin:5px 0 18px}#gamaCloudLogin label{display:block;font-weight:700;margin:8px 0 4px}#gamaCloudLogin input{width:100%;padding:12px;border:1px solid #d4e0e4;border-radius:9px;font-size:16px;box-sizing:border-box}#gamaCloudLogin button{width:100%;padding:12px;border:0;border-radius:9px;background:#087c8b;color:#fff;font-weight:800;margin-top:12px;cursor:pointer}#gamaCloudLogin button:disabled{opacity:.65;cursor:wait}.gamaCloudErr{margin-top:10px;background:#fff0ec;color:#c94f45;padding:10px;border-radius:8px;font-size:12px}.gamaCloudOk{margin-top:10px;background:#e7f6f0;color:#138a69;padding:10px;border-radius:8px;font-size:12px}.gamaCreateBox{margin:14px 0;padding:14px;border:1px solid #e2e8ec;border-radius:12px;background:#f8fafb}.gamaCreateGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.gamaCreateGrid label{font-size:11px;color:#50616c}.gamaCreateGrid input,.gamaCreateGrid select{width:100%;box-sizing:border-box;padding:9px;border:1px solid #d4e0e4;border-radius:8px;background:#fff}.gamaCreateActions{display:flex;justify-content:flex-end;gap:8px;margin-top:9px}.gamaCreateActions button{width:auto;margin-top:0}.gamaCreateStatus{font-size:12px;margin-top:8px}@media(max-width:600px){.gamaCreateGrid{grid-template-columns:1fr}.gamaCreateActions{flex-direction:column}.gamaCreateActions button{width:100%}}`;
     document.head.appendChild(s);
   }
   function removeLogin(){document.getElementById('gamaCloudLogin')?.remove()}
@@ -35,7 +35,7 @@
     const code=error?.code||'';
     if(code==='invalid_credentials')return 'Correo o contraseña incorrectos.';
     if(code==='email_not_confirmed')return 'La cuenta debe confirmar su correo electrónico.';
-    if(code==='user_banned')return 'Esta cuenta está désactivée.';
+    if(code==='user_banned')return 'Esta cuenta está desactivée.';
     return error?.message||'Impossible de se connecter. Réessayez.';
   }
   async function login(){
@@ -79,17 +79,46 @@
     const b=document.createElement('button');b.id='gamaCloudAdminBtn';b.type='button';b.textContent='⚙ Cuentas cloud';b.style='position:fixed;right:14px;top:118px;z-index:70;padding:8px 12px;background:#087C8B;color:#fff;border:0;border-radius:9px;font-weight:800';b.onclick=adminPanel;document.body.appendChild(b);
   }
   function sessionData(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')||null}catch(_){return null}}
+  async function createCloudAccount(form){
+    const status=form.querySelector('[data-create-status]');
+    const button=form.querySelector('[data-create-submit]');
+    const full_name=form.querySelector('[name="full_name"]').value.trim();
+    const email=form.querySelector('[name="email"]').value.trim().toLowerCase();
+    const password=form.querySelector('[name="password"]').value;
+    const role=form.querySelector('[name="role"]').value;
+    if(!full_name||!email||password.length<8||!role){status.textContent='Completa todos los campos. La contraseña debe tener al menos 8 caracteres.';status.style.color='#c94f45';return false}
+    const sr=await window.GamaCloud.getSession();
+    const token=sr?.data?.session?.access_token;
+    if(!token)throw Error('Sesión administrador no disponible.');
+    button.disabled=true;button.textContent='Creando…';status.textContent='';
+    try{
+      const response=await fetch(window.GamaCloud.url+'/functions/v1/gama-admin-users',{method:'POST',headers:{Authorization:'Bearer '+token,apikey:window.GamaCloud.publishableKey||'sb_publishable_4l0vZw61u5EbLkzmrqrf6Q_phOL1Be9', 'Content-Type':'application/json'},body:JSON.stringify({full_name,email,password,role})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw Error(data.message||data.error||'No se pudo crear la cuenta.');
+      status.textContent='Cuenta creada correctamente: '+data.full_name+' · '+LABEL[data.role];status.style.color='#138a69';
+      form.reset();
+      await refreshAdminTable();
+      return true;
+    }finally{button.disabled=false;button.textContent='Crear cuenta'}
+  }
+  async function refreshAdminTable(){
+    const host=document.getElementById('gamaCloudUsersTable');if(!host||!window.GamaCloud)return;
+    const rows=await window.GamaCloud.list('profiles',{order:'created_at',ascending:true});
+    if(rows.error){host.innerHTML='<div class="gamaCloudErr">No se pudieron leer los perfiles: '+String(rows.error.message||rows.error)+'</div>';return}
+    const roleLabel=r=>LABEL[r]||r||'—';
+    host.innerHTML='<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead><tbody>'+(rows.data||[]).map(x=>'<tr><td>'+String(x.full_name||'—')+'</td><td>'+String(x.email||'—')+'</td><td>'+String(roleLabel(x.role))+'</td><td>'+String(x.active===false?'Desactivado':'Activo')+'</td></tr>').join('')+'</tbody></table>';
+  }
   async function adminPanel(){
     if(document.getElementById('gamaCloudAdmin'))return;
-    const rows=await window.GamaCloud.list('profiles',{order:'created_at',ascending:true});
     const d=document.createElement('div');d.id='gamaCloudAdmin';d.style='position:fixed;inset:0;z-index:99998;background:#18324a66;display:grid;place-items:center;padding:20px';
-    d.innerHTML='<div style="width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px"><button id="gamaCloudClose" class="secondary">Cerrar</button><h2>👥 Usuarios cloud</h2><p class="muted">Fuente única: Supabase / profiles.</p><div id="gamaCloudUsersTable"></div></div>';
-    document.body.appendChild(d);d.querySelector('#gamaCloudClose').onclick=()=>d.remove();
-    const roleLabel=r=>LABEL[r]||r||'—';
-    d.querySelector('#gamaCloudUsersTable').innerHTML='<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead><tbody>'+(rows.data||[]).map(x=>'<tr><td>'+String(x.full_name||'—')+'</td><td>'+String(x.email||'—')+'</td><td>'+String(roleLabel(x.role))+'</td><td>'+String(x.active===false?'Desactivado':'Activo')+'</td></tr>').join('')+'</tbody></table>';
+    d.innerHTML='<div style="width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px"><button id="gamaCloudClose" class="secondary">Cerrar</button><h2>👥 Usuarios cloud</h2><p class="muted">Fuente única: Supabase / profiles.</p><div class="gamaCreateBox"><h3 style="margin:0 0 8px">Crear una cuenta</h3><div class="gamaCreateGrid"><label>Nombre completo<input name="full_name" autocomplete="name" placeholder="Nombre y apellido"></label><label>Email<input name="email" type="email" autocomplete="email" placeholder="cliente@ejemplo.com"></label><label>Contraseña<input name="password" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres"></label><label>Rol<select name="role"><option value="cliente">Cliente — acceso al catálogo y pedidos</option><option value="comercial">Comercial</option><option value="almacenero">Almacenero</option><option value="administrador">Administrador</option></select></label></div><div class="gamaCreateActions"><button id="gamaCreateSubmit" data-create-submit class="primary" type="button">Crear cuenta</button></div><div class="gamaCreateStatus" data-create-status aria-live="polite"></div></div><div id="gamaCloudUsersTable"></div></div>';
+    document.body.appendChild(d);
+    d.querySelector('#gamaCloudClose').onclick=()=>d.remove();
+    d.querySelector('#gamaCreateSubmit').onclick=()=>createCloudAccount(d).catch(e=>{console.error('[GAMA Cloud account]',e);const s=d.querySelector('[data-create-status]');s.textContent='Error: '+(e.message||e);s.style.color='#c94f45';d.querySelector('#gamaCreateSubmit').disabled=false;d.querySelector('#gamaCreateSubmit').textContent='Crear cuenta'});
+    await refreshAdminTable();
   }
   function init(){
-    if(started)return;started=true;window.GamaCloudAuth={ensure,login};
+    if(started)return;started=true;window.GamaCloudAuth={ensure,login,createCloudAccount};
     window.addEventListener('gama:auth-change',async e=>{
       if(e.detail?.event==='SIGNED_OUT'){localStorage.removeItem('gama_session_v1');document.getElementById('gamaCloudAdminBtn')?.remove();showLogin();return}
       if(e.detail?.session){await ensure();adminButton()}
