@@ -12,9 +12,9 @@ test('refactored runtime and bounded contexts bootstrap without page errors', as
     message: 'GAMA legacy runtime did not bootstrap'
   }).toBe(true);
 
-  await expect.poll(async () => page.evaluate(() => Boolean(window.GamaLegacyServicesReady)), {
+  await expect.poll(async () => page.evaluate(() => Boolean(window.GamaLegacyCoreReady)), {
     timeout: 10_000,
-    message: 'GAMA shared legacy services did not bootstrap'
+    message: 'GAMA shared legacy core did not bootstrap'
   }).toBe(true);
 
   const state = await page.evaluate(() => ({
@@ -41,7 +41,7 @@ test('refactored runtime and bounded contexts bootstrap without page errors', as
     dashboard: true
   });
   expect(state.requiredHandlers).toBe(true);
-  expect(state.legacyCoreScript).toBe(false);
+  expect(state.legacyCoreScript).toBe(true);
   expect(state.inlineLegacyKey).toBe(false);
   expect(errors, errors.join('\n')).toEqual([]);
 });
