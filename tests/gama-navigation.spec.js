@@ -55,7 +55,10 @@ test('authenticated user bar stays directly under the GAMA header/logo', async (
   await openApp(page);
   await requireAuth(page);
   const bar = page.locator('#gamaAccessUser');
+  const host = page.locator('#gamaFixedTopActions');
   await expect(bar).toBeVisible();
+  await expect(host).toHaveCount(1);
+  await expect(host.locator('#gamaAccessUser')).toHaveCount(1);
   await expect(bar).toContainText(/Administrador|Comercial|Almacenero|Cliente/i);
   await expect(bar.locator('#gamaAccessLogout')).toBeVisible();
   await expect(bar.locator('#gamaAccessLogout')).toBeEnabled();
