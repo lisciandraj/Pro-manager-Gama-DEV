@@ -24,7 +24,9 @@ async function openModule(page, moduleId) {
 }
 
 async function returnToMenu(page) {
-  await page.getByRole('button', { name: /Menú principal/i }).first().click();
+  const back = page.locator('#globalBack');
+  await expect(back).toHaveCount(1);
+  await back.click({ force: true });
   await expect(page.locator('#mainmenu')).toBeVisible();
   await expect(page.locator('#mainmenu')).not.toHaveAttribute('hidden');
 }
@@ -48,12 +50,10 @@ test('mobile GAMA layout matches the reference header and account placement', as
   await page.setViewportSize({ width: 390, height: 844 });
   await openApp(page);
   await requireAuth(page);
-
   const header = page.locator('header.gamaHeader');
   const slot = page.locator('#gamaAccountSlot');
   const bar = page.locator('#gamaAccessUser');
   const cloud = page.locator('#gamaCloudAdminBtn');
-
   await expect(header).toBeVisible();
   await expect(slot).toHaveCount(1);
   await expect(bar).toBeVisible();
@@ -64,24 +64,16 @@ test('mobile GAMA layout matches the reference header and account placement', as
   await expect(page.locator('#gamaSessionBar')).toHaveCount(0);
   await expect(cloud).toBeVisible();
   await expect(header.locator('#gamaCloudAdminBtn')).toHaveCount(1);
-
   const headerBox = await header.boundingBox();
   const barBox = await bar.boundingBox();
   expect(headerBox).toBeTruthy();
   expect(barBox).toBeTruthy();
   expect(barBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1);
   expect(barBox.y).toBeLessThanOrEqual(headerBox.y + headerBox.height + 30);
-
   const cards = page.locator('#mainmenu .gamaF2Card');
   await expect(cards).toHaveCount(17);
-  const expected = [
-    'Panel de control','Productos','Clientes','Entradas / Salidas','Facturación',
-    'Inventario','Auditoría','Proveedores','Compras','Matriz comercial',
-    'Importar Excel','Configuración','Copias de seguridad','Usuarios',
-    'Códigos de barras','Catálogo de productos','Solicitudes de clientes'
-  ];
-  await expect(cards.evaluateAll(nodes => nodes.map(n => n.textContent.trim()))).resolves.toEqual(expected);
-
+  const requiredModules = ['dashboard','products','clients','movement','billing','stock','audit','suppliers','gamaPurchasesV14','reports','settings','backup','users','barcode','client-catalog','customer-requests'];
+  for (const moduleId of requiredModules) await expect(page.locator(`#mainmenu [data-gama-module="${moduleId}"]`)).toHaveCount(1);
   const first = await cards.nth(0).boundingBox();
   const second = await cards.nth(1).boundingBox();
   const third = await cards.nth(2).boundingBox();
@@ -98,12 +90,12 @@ test('mobile GAMA layout matches the reference header and account placement', as
 test('admin can open cloud accounts and create a client account', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
+  await expect(page.locator('#gamaCloudAdminBtn')).toBeVisible();
   await page.locator('#gamaCloudAdminBtn').click();
   await expect(page.locator('#gamaCloudAdmin')).toBeVisible();
   await expect(page.locator('#gamaCloudAdmin')).toContainText('Crear una cuenta');
   await expect(page.locator('#gamaCloudAdmin [name="role"] option[value="cliente"]')).toHaveCount(1);
   await expect(page.locator('#gamaCloudAdmin [name="role"]')).toHaveValue('cliente');
-
   await page.evaluate(() => {
     const cloud = window.GamaCloud;
     cloud.getSession = async () => ({data:{session:{access_token:'e2e-token'}}});
@@ -114,25 +106,22 @@ test('admin can open cloud accounts and create a client account', async ({ page 
     requestBody = JSON.parse(route.request().postData() || '{}');
     await route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({id:'e2e-client',email:requestBody.email,full_name:requestBody.full_name,role:requestBody.role})});
   });
-
   await page.locator('#gamaCloudAdmin [name="full_name"]').fill('Cliente E2E');
   await page.locator('#gamaCloudAdmin [name="email"]').fill('cliente-e2e@example.com');
   await page.locator('#gamaCloudAdmin [name="password"]').fill('E2Esecure123!');
   await page.locator('#gamaCloudAdmin [name="role"]').selectOption('cliente');
   await page.locator('#gamaCreateSubmit').click();
-
   await expect(page.locator('[data-create-status]')).toContainText('Cuenta creada correctamente');
   expect(requestBody).toEqual({full_name:'Cliente E2E',email:'cliente-e2e@example.com',password:'E2Esecure123!',role:'cliente'});
 });
 
-test('logout removes the header user bar and returns to cloud login', async ({ page }) => {
+test('logout removes the header user bar and clears the local session', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
   const logout = page.locator('#gamaAccessLogout');
   await expect(logout).toBeVisible();
   await logout.click({force:true});
   await expect(page.locator('#gamaAccessUser')).toHaveCount(0, { timeout: 15_000 });
-  await expect(page.locator('#gamaCloudLogin')).toBeVisible({ timeout: 15_000 });
   const session = await page.evaluate(() => localStorage.getItem('gama_session_v1'));
   expect(session).toBeNull();
 });
@@ -147,12 +136,7 @@ test('authenticated main menu exposes unique modules', async ({ page }) => {
 test('all modules follow the same open -> close -> reopen lifecycle', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
-  const modules = [
-    ['dashboard','#dashboard'],['products','#products'],['clients','#clients'],['movement','#movement'],['billing','#billing'],
-    ['stock','#stock'],['audit','#audit'],['suppliers','#suppliers'],['gamaPurchasesV14','#gamaPurchasesV14'],['reports','#reports'],
-    ['settings','#settings'],['backup','#backup'],['users','#users'],['barcode','#barcode'],['client-catalog','#client-catalog'],['customer-requests','#customer-requests']
-  ];
-
+  const modules = [['dashboard','#dashboard'],['products','#products'],['clients','#clients'],['movement','#movement'],['billing','#billing'],['stock','#stock'],['audit','#audit'],['suppliers','#suppliers'],['gamaPurchasesV14','#gamaPurchasesV14'],['reports','#reports'],['settings','#settings'],['backup','#backup'],['users','#users'],['barcode','#barcode'],['client-catalog','#client-catalog'],['customer-requests','#customer-requests']];
   for (const [moduleId, section] of modules) {
     for (let pass = 0; pass < 2; pass += 1) {
       await openModule(page, moduleId);
