@@ -51,6 +51,29 @@ test('authenticated session exposes a valid GAMA role', async ({ page }) => {
   expect(['admin', 'commercial', 'magasinier', 'client']).toContain(session.role);
 });
 
+test('authenticated user bar shows identity, role and logout action', async ({ page }) => {
+  await openApp(page);
+  await requireAuth(page);
+  const bar = page.locator('#gamaSessionBar');
+  await expect(bar).toBeVisible();
+  await expect(bar).toContainText(/Conectado como:/i);
+  await expect(bar).toContainText(/Rol:/i);
+  await expect(bar.locator('#gamaSessionLogout')).toBeVisible();
+  await expect(bar.locator('#gamaSessionLogout')).toBeEnabled();
+});
+
+test('logout removes the session bar and returns to cloud login', async ({ page }) => {
+  await openApp(page);
+  await requireAuth(page);
+  const logout = page.locator('#gamaSessionLogout');
+  await expect(logout).toBeVisible();
+  await logout.click();
+  await expect(page.locator('#gamaSessionBar')).toHaveCount(0, { timeout: 15_000 });
+  await expect(page.locator('#gamaCloudLogin')).toBeVisible({ timeout: 15_000 });
+  const session = await page.evaluate(() => localStorage.getItem('gama_session_v1'));
+  expect(session).toBeNull();
+});
+
 test('authenticated main menu exposes unique modules', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
