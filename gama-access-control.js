@@ -11,20 +11,22 @@
     if(document.getElementById('gamaAccessStyle'))return;
     const s=document.createElement('style');s.id='gamaAccessStyle';
     s.textContent=`
-      .gamaAccessUser{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;background:#fff;border:1px solid #e2e8ec;border-radius:999px;padding:7px 10px 7px 13px;font-size:13px;box-shadow:0 6px 22px #18324a20;display:flex;align-items:center;gap:7px;max-width:calc(100vw - 24px);box-sizing:border-box;white-space:nowrap}
+      .gamaAccessUser{position:relative;background:#fff;border:1px solid #e2e8ec;border-radius:999px;padding:7px 10px 7px 13px;font-size:13px;box-shadow:0 6px 22px #18324a20;display:flex;align-items:center;gap:7px;max-width:100%;box-sizing:border-box;white-space:nowrap}
       .gamaAccessUser b{color:#18324a;font-weight:850;overflow:hidden;text-overflow:ellipsis}
       .gamaAccessRole{font-weight:850;color:#087c8b}
       .gamaAccessUser button{border:0;border-radius:999px;background:#eef3f4;color:#18324a;padding:7px 11px;font-weight:800;cursor:pointer;flex:0 0 auto;touch-action:manipulation}
       .gamaAccessUser button:hover{background:#e5eef0}
       .gamaAccessUser button:disabled{opacity:.65;cursor:wait}
-      @media(max-width:700px){.gamaAccessUser{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));transform:none;width:auto;max-width:none;justify-content:flex-start;font-size:11px;padding:6px 8px 6px 10px;gap:6px}.gamaAccessUser b{min-width:0}.gamaAccessUser button{padding:6px 9px;font-size:11px}}
     `;document.head.appendChild(s);
   }
   function userBar(){
     style();
     let el=document.getElementById('gamaAccessUser'),s=session();
     if(!s){el?.remove();return;}
-    if(!el){el=document.createElement('div');el.id='gamaAccessUser';el.className='gamaAccessUser';document.body.appendChild(el);}
+    if(!el){el=document.createElement('div');el.id='gamaAccessUser';el.className='gamaAccessUser';
+      const slot=document.getElementById('gamaAccountSlot');
+      (slot||document.body).appendChild(el);
+    }
     el.innerHTML='👤 <b>'+esc(s.name||s.username||'Utilisateur')+'</b><span>·</span><span class="gamaAccessRole">'+esc(ROLE_LABEL[s.role]||s.role)+'</span><button type="button" id="gamaAccessLogout">Salir</button>';
     el.querySelector('#gamaAccessLogout').onclick=async()=>{const b=el.querySelector('button');b.disabled=true;b.textContent='…';try{await window.GamaCloud?.signOut()}catch(e){console.warn('[GAMA] signOut',e)}localStorage.removeItem('gama_session_v1');sessionStorage.removeItem('gama_session_v1');location.reload();};
   }
