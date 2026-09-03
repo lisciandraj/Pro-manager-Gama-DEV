@@ -51,7 +51,7 @@ test('authenticated session exposes a valid GAMA role', async ({ page }) => {
   expect(['admin', 'commercial', 'magasinier', 'client']).toContain(session.role);
 });
 
-test('authenticated user bar is fixed at the bottom with logout action', async ({ page }) => {
+test('authenticated user bar stays directly under the GAMA header/logo', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
   const bar = page.locator('#gamaAccessUser');
@@ -59,13 +59,16 @@ test('authenticated user bar is fixed at the bottom with logout action', async (
   await expect(bar).toContainText(/Administrador|Comercial|Almacenero|Cliente/i);
   await expect(bar.locator('#gamaAccessLogout')).toBeVisible();
   await expect(bar.locator('#gamaAccessLogout')).toBeEnabled();
-  const box = await bar.boundingBox();
-  expect(box).toBeTruthy();
-  expect(box.y + box.height).toBeGreaterThanOrEqual((await page.evaluate(() => window.innerHeight)) - 30);
+  const headerBox = await page.locator('header.gamaHeader').boundingBox();
+  const barBox = await bar.boundingBox();
+  expect(headerBox).toBeTruthy();
+  expect(barBox).toBeTruthy();
+  expect(barBox.y).toBeGreaterThan(headerBox.y + 55);
+  expect(barBox.y + barBox.height).toBeLessThanOrEqual(headerBox.y + headerBox.height + 2);
   await expect(page.locator('#gamaSessionBar')).toHaveCount(0);
 });
 
-test('logout removes the bottom user bar and returns to cloud login', async ({ page }) => {
+test('logout removes the header user bar and returns to cloud login', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
   const logout = page.locator('#gamaAccessLogout');
