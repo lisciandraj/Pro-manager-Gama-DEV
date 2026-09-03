@@ -1,8 +1,8 @@
-/* GAMA Module Loader — Excel + Achats + Settings V30 */
+/* GAMA Module Loader — Excel + Achats + Settings V31 */
 (function(){
   'use strict';
   const PURCHASES='gama-purchases-v14.js?v=20260827-5';
-  const EXCEL='gama-excel-import.js?v=7';
+  const EXCEL='gama-excel-import.js?v=9';
   const EXCEL_FALLBACK='gama-excel-standalone.js?v=1';
   const SETTINGS='gama-settings-standalone.js?v=1';
   let started=false, excelLoading=null;
@@ -34,33 +34,43 @@
     loadScript(PURCHASES).then(run).catch(function(e){console.error('[GAMA] Achats load error',e);alert('Le module Achats n’a pas pu être chargé. Rechargez la page.')});
   }
 
-  function getExcelSection(){return document.getElementById('excelImport')}
+  function getExcelContent(){return document.getElementById('excelImport')}
 
   function renderExcel(){
     if(window.GamaExcelImport&&typeof window.GamaExcelImport.render==='function'){
       window.GamaExcelImport.render();
-      return getExcelSection();
+      return getExcelContent();
     }
-    return getExcelSection();
+    return getExcelContent();
   }
 
   function ensureExcel(){
-    const existing=getExcelSection();
-    if(existing){renderExcel();return Promise.resolve(existing)}
-    if(window.GamaExcelImport){return Promise.resolve(renderExcel())}
+    if(window.GamaExcelImport){renderExcel();return Promise.resolve(getExcelContent())}
     if(excelLoading)return excelLoading;
     excelLoading=loadScript(EXCEL).then(function(){
-      return renderExcel();
-    }).catch(function(){
-      return loadScript(EXCEL_FALLBACK).then(function(){return renderExcel()});
+      if(window.GamaExcelImport)return renderExcel();
+      throw new Error('GamaExcelImport indisponible');
+    }).catch(function(err){
+      console.warn('[GAMA] Excel principal indisponible, utilisation du fallback',err);
+      return loadScript(EXCEL_FALLBACK).then(function(){
+        if(window.GamaExcelImport)return renderExcel();
+        throw new Error('Module Excel indisponible');
+      });
     });
     return excelLoading;
   }
 
   function openExcelModule(){
     ensureExcel().then(function(){
-      const sec=renderExcel();
-      if(!sec){throw new Error('Module Import Excel indisponible')}
+      const content=renderExcel();
+      if(!content){throw new Error('Module Import Excel indisponible')}
+      let sec=document.getElementById('gama-excel-import-section');
+      if(!sec){
+        sec=document.createElement('section');
+        sec.id='gama-excel-import-section';
+        (document.querySelector('.wrap')||document.body).appendChild(sec);
+      }
+      if(content.parentElement!==sec)sec.appendChild(content);
       document.querySelectorAll('section').forEach(function(s){
         s.classList.remove('active');
         s.style.display='none';
