@@ -94,6 +94,36 @@ test('mobile GAMA layout matches the reference header and account placement', as
   expect(first.width / first.height).toBeLessThan(1.8);
 });
 
+test('admin can open cloud accounts and create a client account', async ({ page }) => {
+  await openApp(page);
+  await requireAuth(page);
+  await page.locator('#gamaCloudAdminBtn').click();
+  await expect(page.locator('#gamaCloudAdmin')).toBeVisible();
+  await expect(page.locator('#gamaCloudAdmin')).toContainText('Crear una cuenta');
+  await expect(page.locator('#gamaCloudAdmin [name="role"] option[value="cliente"]')).toHaveCount(1);
+  await expect(page.locator('#gamaCloudAdmin [name="role"]')).toHaveValue('cliente');
+
+  await page.evaluate(() => {
+    const cloud = window.GamaCloud;
+    cloud.getSession = async () => ({data:{session:{access_token:'e2e-token'}}});
+    cloud.list = async () => ({data:[],error:null});
+  });
+  let requestBody = null;
+  await page.route('**/functions/v1/gama-admin-users', async route => {
+    requestBody = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({id:'e2e-client',email:requestBody.email,full_name:requestBody.full_name,role:requestBody.role})});
+  });
+
+  await page.locator('#gamaCloudAdmin [name="full_name"]').fill('Cliente E2E');
+  await page.locator('#gamaCloudAdmin [name="email"]').fill('cliente-e2e@example.com');
+  await page.locator('#gamaCloudAdmin [name="password"]').fill('E2Esecure123!');
+  await page.locator('#gamaCloudAdmin [name="role"]').selectOption('cliente');
+  await page.locator('#gamaCreateSubmit').click();
+
+  await expect(page.locator('[data-create-status]')).toContainText('Cuenta creada correctamente');
+  expect(requestBody).toEqual({full_name:'Cliente E2E',email:'cliente-e2e@example.com',password:'E2Esecure123!',role:'cliente'});
+});
+
 test('logout removes the header user bar and returns to cloud login', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
