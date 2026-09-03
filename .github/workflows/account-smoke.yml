@@ -1,0 +1,25 @@
+name: GAMA Cloud Account Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  account-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run cloud account smoke test
+        run: npx playwright test tests/gama-navigation.spec.js -g "admin can open cloud accounts and create a client account"
