@@ -1,4 +1,4 @@
-/* GAMA — Navigation centrale v1 */
+/* GAMA — Navigation centrale v2 */
 (function () {
   'use strict';
   if (window.GamaMenu) return;
@@ -23,84 +23,45 @@
   };
 
   const ITEMS = [
-    ['Panel de control','dashboard','chart','*'],
-    ['Productos','products','cube','*'],
-    ['Clientes','clients','users','admin,commercial'],
-    ['Entradas / Salidas','movement','move','admin,commercial,magasinier'],
-    ['Facturación','billing','invoice','admin,commercial'],
-    ['Inventario','stock','stock','admin,commercial,magasinier'],
-    ['Auditoría','audit','audit','admin'],
-    ['Proveedores','suppliers','truck','admin,commercial'],
-    ['Compras','gamaPurchasesV14','cart','admin,commercial'],
-    ['Importar Excel','reports','sheet','admin,commercial'],
-    ['Configuración','settings','gear','admin'],
-    ['Copias de seguridad','backup','cloud','admin'],
-    ['Usuarios','users','user','admin'],
-    ['Códigos de barras','barcode','barcode','admin,commercial,magasinier'],
-    ['Catálogo de productos','client-catalog','catalog','admin,commercial,client'],
+    ['Panel de control','dashboard','chart','*'],['Productos','products','cube','*'],['Clientes','clients','users','admin,commercial'],
+    ['Entradas / Salidas','movement','move','admin,commercial,magasinier'],['Facturación','billing','invoice','admin,commercial'],['Inventario','stock','stock','admin,commercial,magasinier'],
+    ['Auditoría','audit','audit','admin'],['Proveedores','suppliers','truck','admin,commercial'],['Compras','gamaPurchasesV14','cart','admin,commercial'],
+    ['Importar Excel','reports','sheet','admin,commercial'],['Configuración','settings','gear','admin'],['Copias de seguridad','backup','cloud','admin'],
+    ['Usuarios','users','user','admin'],['Códigos de barras','barcode','barcode','admin,commercial,magasinier'],['Catálogo de productos','client-catalog','catalog','admin,commercial,client'],
     ['Solicitudes de clientes','customer-requests','request','admin,commercial']
   ];
 
-  function role() {
-    try { return JSON.parse(localStorage.getItem('gama_session_v1') || 'null')?.role || ''; }
-    catch (_) { return ''; }
-  }
-  function allowed(itemRole) {
-    const r = role();
-    return itemRole === '*' || itemRole.split(',').includes(r);
-  }
-  function show(id) {
-    if (typeof window.showTab !== 'function') return false;
-    return window.showTab(id, null);
-  }
-  function lazy(name, src, open) {
-    if (typeof window[name] === 'function') return window[name]();
-    const id = 'gama-lazy-' + name;
-    if (!document.getElementById(id)) {
-      const s = document.createElement('script');
-      s.id = id; s.src = src; s.async = false;
-      s.onload = () => typeof window[name] === 'function' && window[name]();
-      s.onerror = () => console.error('[GAMA] Module unavailable:', src);
-      document.head.appendChild(s);
-    } else if (open) setTimeout(open, 50);
+  function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(_){return ''}}
+  function allowed(rules){const r=role();return rules==='*'||rules.split(',').includes(r)}
+
+  // All modules use the same navigation path. Special modules are already
+  // preloaded; their open functions are used only to refresh their content.
+  function open(id){
+    if(typeof window.showTab!=='function') return false;
+    const ok=window.showTab(id,null);
+    if(!ok) return false;
+    if(id==='client-catalog') window.GamaOpenClientCatalog?.();
+    if(id==='customer-requests') window.GamaOpenCustomerRequests?.();
     return true;
   }
-  function open(id) {
-    if (id === 'client-catalog') return lazy('GamaOpenClientCatalog','gama-client-catalog.js?v=6',()=>window.GamaOpenClientCatalog?.());
-    if (id === 'customer-requests') return lazy('GamaOpenCustomerRequests','gama-customer-requests.js?v=3',()=>window.GamaOpenCustomerRequests?.());
-    return show(id);
+
+  function style(){
+    if(document.getElementById('gamaMenuStyle'))return;
+    const s=document.createElement('style');s.id='gamaMenuStyle';
+    s.textContent=`#mainmenu .gamaF2Grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:12px 18px 24px}#mainmenu .gamaF2Card{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;padding:18px 10px;margin:0;background:#fff;border:1px solid #e1e9ec;border-radius:18px;box-shadow:0 5px 18px #18324a12;color:#173246;cursor:pointer;transition:.15s}#mainmenu .gamaF2Card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #18324a18}#mainmenu .gamaF2Icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:18px;background:#e8f5f6;color:#087c8b;margin-bottom:12px}#mainmenu .gamaF2Icon svg{width:33px;height:33px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}#mainmenu .gamaF2Title{font-size:15px;font-weight:800;line-height:1.2;text-align:center}@media(max-width:900px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px}#mainmenu .gamaF2Card{min-height:140px;padding:14px 7px}}`;
+    document.head.appendChild(s)
   }
-  function style() {
-    if (document.getElementById('gamaMenuStyle')) return;
-    const s = document.createElement('style'); s.id = 'gamaMenuStyle';
-    s.textContent = `#mainmenu .gamaF2Grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:12px 18px 24px}#mainmenu .gamaF2Card{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px;padding:18px 10px;margin:0;background:#fff;border:1px solid #e1e9ec;border-radius:18px;box-shadow:0 5px 18px #18324a12;color:#173246;cursor:pointer;transition:.15s}#mainmenu .gamaF2Card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #18324a18}#mainmenu .gamaF2Icon{display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:18px;background:#e8f5f6;color:#087c8b;margin-bottom:12px}#mainmenu .gamaF2Icon svg{width:33px;height:33px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}#mainmenu .gamaF2Title{font-size:15px;font-weight:800;line-height:1.2;text-align:center}@media(max-width:900px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px}#mainmenu .gamaF2Card{min-height:140px;padding:14px 7px}}`;
-    document.head.appendChild(s);
+  function card(item){
+    const b=document.createElement('button');b.type='button';b.className='gamaF2Card';b.dataset.gamaModule=item[1];
+    const icon=document.createElement('span');icon.className='gamaF2Icon';icon.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[item[2]]+'</svg>';
+    const label=document.createElement('span');label.className='gamaF2Title';label.textContent=item[0];b.append(icon,label);b.onclick=()=>open(item[1]);return b
   }
-  function card(item) {
-    const b=document.createElement('button'); b.type='button'; b.className='gamaF2Card'; b.dataset.gamaModule=item[1];
-    const icon=document.createElement('span'); icon.className='gamaF2Icon';
-    icon.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[item[2]]+'</svg>';
-    const label=document.createElement('span'); label.className='gamaF2Title'; label.textContent=item[0];
-    b.append(icon,label); b.onclick=()=>open(item[1]); return b;
+  function render(){
+    const host=document.getElementById('mainmenu');if(!host)return;style();const r=role();host.replaceChildren();
+    const h=document.createElement('h2');h.textContent='Menú principal';h.style.cssText='margin:22px 18px 8px;color:#173246;font-size:28px';
+    const p=document.createElement('p');p.textContent='Acceso rápido a las funciones de GAMA Stock Manager.';p.style.cssText='margin:0 18px 14px;color:#7b8891;font-size:14px';
+    const grid=document.createElement('div');grid.className='gamaF2Grid';if(r)ITEMS.filter(x=>allowed(x[3])).forEach(x=>grid.appendChild(card(x)));host.append(h,p,grid);window.dispatchEvent(new CustomEvent('gama:menu-ready'))
   }
-  function render() {
-    const host=document.getElementById('mainmenu'); if(!host)return;
-    style();
-    const r=role();
-    host.replaceChildren();
-    const h=document.createElement('h2'); h.textContent='Menú principal'; h.style.cssText='margin:22px 18px 8px;color:#173246;font-size:28px';
-    const p=document.createElement('p'); p.textContent='Acceso rápido a las funciones de GAMA Stock Manager.'; p.style.cssText='margin:0 18px 14px;color:#7b8891;font-size:14px';
-    const grid=document.createElement('div'); grid.className='gamaF2Grid';
-    if(r) ITEMS.filter(x=>allowed(x[3])).forEach(x=>grid.appendChild(card(x)));
-    host.append(h,p,grid);
-    window.dispatchEvent(new CustomEvent('gama:menu-ready'));
-  }
-  function init(){
-    if(window.GamaMenu) return;
-    window.GamaMenu={render,open};
-    render();
-    window.addEventListener('gama:auth-ready',render);
-    window.addEventListener('gama:auth-change',()=>setTimeout(render,0));
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+  function init(){if(window.GamaMenu)return;window.GamaMenu={render,open};render();window.addEventListener('gama:auth-ready',render);window.addEventListener('gama:auth-change',()=>setTimeout(render,0))}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
