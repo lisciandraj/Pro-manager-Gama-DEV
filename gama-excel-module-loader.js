@@ -1,14 +1,26 @@
-/* GAMA Module Loader — Excel + Achats + Livraison V17 */
+/* GAMA Module Loader — Excel + Achats + Livraison V18 */
 (function(){
   'use strict';
   const PURCHASES='gama-purchases-v14.js?v=20260827-5';
-  const EXCEL='gama-excel-import.js?v=4';
+  const EXCEL='gama-excel-import.js?v=5';
   const DELIVERY='gama-delivery-module.js?v=1';
   let started=false;
   function loadScript(src){return new Promise(function(resolve,reject){const base=src.split('?')[0];const existing=document.querySelector('script[data-gama-module="'+base+'"],script[src*="'+base+'"]');if(existing){if(base.includes('gama-purchases-v14')&&window.gamaShowPurchases)return resolve();if(base.includes('gama-excel-import')&&window.GamaExcelImport)return resolve();if(base.includes('gama-delivery-module')&&window.GamaOpenDelivery)return resolve();if(existing.dataset.gamaLoaded==='1')return resolve();existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',reject,{once:true});return;}const s=document.createElement('script');s.src=src;s.dataset.gamaModule=base;s.onload=function(){s.dataset.gamaLoaded='1';resolve()};s.onerror=reject;document.head.appendChild(s);});}
   function openPurchases(){const run=function(){if(window.gamaShowPurchases){window.gamaShowPurchases();return true}return false};if(run())return;loadScript(PURCHASES).then(run).catch(function(e){console.error('[GAMA] Achats load error',e);alert('Le module Achats n’a pas pu être chargé. Rechargez la page.')});}
   function openDelivery(){const run=function(){if(window.GamaOpenDelivery){window.GamaOpenDelivery();return true}return false};if(run())return;loadScript(DELIVERY).then(run).catch(function(e){console.error('[GAMA] Livraison load error',e);alert('Le module Livraison n’a pas pu être chargé. Rechargez la page.')});}
+  function openExcel(){if(typeof window.GamaOpenExcelImport==='function'){window.GamaOpenExcelImport();return true}return false}
   function revealPurchaseCards(){document.querySelectorAll('[data-gama-purchases-v16]').forEach(function(card){card.classList.remove('aclHidden');card.removeAttribute('hidden');card.style.display='flex'});document.querySelectorAll('[data-gama-purchases-v16-tab]').forEach(function(tab){tab.classList.remove('aclHidden');tab.removeAttribute('hidden')})}
+  function installExcelCard(){
+    const grid=document.querySelector('#mainmenu .gamaF2Grid');
+    if(!grid)return false;
+    let card=grid.querySelector('[data-gama-module="excel-import"]');
+    if(!card){
+      card=document.createElement('button');card.type='button';card.className='gamaF2Card';card.dataset.gamaModule='excel-import';card.setAttribute('aria-label','Ouvrir le module Importar Excel');
+      card.innerHTML='<span class="gamaF2Icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M15 16h4m-2-2v4"/></svg></span><span class="gamaF2Title">Importar Excel</span>';
+      card.onclick=openExcel;grid.appendChild(card);
+    }else card.onclick=openExcel;
+    return true;
+  }
   function installPurchases(){
     const oldHost=document.querySelector('#mainmenu .appGrid');
     const newHost=document.querySelector('#mainmenu .gamaF2Grid');
@@ -17,7 +29,7 @@
     const tabs=document.querySelector('.tabs');if(tabs&&!tabs.querySelector('[data-gama-purchases-v16-tab]')){const tab=document.createElement('button');tab.type='button';tab.className='tab';tab.dataset.gamaPurchasesV16Tab='1';tab.innerHTML='🛒<span>Achats</span>';tab.onclick=openPurchases;tabs.appendChild(tab)}revealPurchaseCards();return !!(oldHost||newHost);
   }
   function mountExcel(){if(!window.GamaExcelImport)return;let section=document.getElementById('gama-excel-import-section');if(!section){section=document.createElement('section');section.id='gama-excel-import-section';section.style.display='none';section.innerHTML='<div id="excel-import-module"></div>';(document.querySelector('.wrap')||document.body).appendChild(section)}try{window.GamaExcelImport.render()}catch(e){console.warn('[GAMA] Excel render',e)}}
-  function openExcel(){document.querySelectorAll('section').forEach(function(s){s.classList.remove('active');s.style.display='none'});const sec=document.getElementById('gama-excel-import-section');if(sec){sec.style.display='block';sec.classList.add('active')}document.getElementById('mainmenu')?.setAttribute('hidden','');mountExcel();window.scrollTo({top:0,behavior:'smooth'})}
-  async function boot(){if(started)return;started=true;try{await loadScript(EXCEL)}catch(e){console.warn('[GAMA] Excel load',e)}try{await loadScript(PURCHASES)}catch(e){console.warn('[GAMA] Achats preload',e)}try{await loadScript(DELIVERY)}catch(e){console.warn('[GAMA] Livraison preload',e)}mountExcel();installPurchases();if(window.GamaDeliveryRender)window.GamaDeliveryRender();let tries=0;const timer=setInterval(function(){mountExcel();installPurchases();if(window.GamaDeliveryRender)window.GamaDeliveryRender();if(++tries>40)clearInterval(timer)},250);new MutationObserver(function(){installPurchases();mountExcel()}).observe(document.body,{subtree:true,childList:true})}
-  window.GamaOpenExcelImport=openExcel;window.GamaOpenPurchases=openPurchases;window.GamaOpenDelivery=openDelivery;if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  function openExcelModule(){document.querySelectorAll('section').forEach(function(s){s.classList.remove('active');s.style.display='none'});const sec=document.getElementById('gama-excel-import-section');if(sec){sec.style.display='block';sec.classList.add('active')}document.getElementById('mainmenu')?.setAttribute('hidden','');mountExcel();window.scrollTo({top:0,behavior:'smooth'})}
+  async function boot(){if(started)return;started=true;try{await loadScript(EXCEL)}catch(e){console.warn('[GAMA] Excel load',e)}try{await loadScript(PURCHASES)}catch(e){console.warn('[GAMA] Achats preload',e)}try{await loadScript(DELIVERY)}catch(e){console.warn('[GAMA] Livraison preload',e)}window.GamaOpenExcelImport=openExcelModule;mountExcel();installExcelCard();installPurchases();if(window.GamaDeliveryRender)window.GamaDeliveryRender();let tries=0;const timer=setInterval(function(){mountExcel();installExcelCard();installPurchases();if(window.GamaDeliveryRender)window.GamaDeliveryRender();if(++tries>40)clearInterval(timer)},250);new MutationObserver(function(){installExcelCard();installPurchases();mountExcel()}).observe(document.body,{subtree:true,childList:true})}
+  window.GamaOpenExcelImport=openExcelModule;window.GamaOpenPurchases=openPurchases;window.GamaOpenDelivery=openDelivery;if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
