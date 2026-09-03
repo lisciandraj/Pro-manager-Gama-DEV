@@ -1,4 +1,4 @@
-/* GAMA — Access control v2: one source of truth */
+/* GAMA — Access control v3: one source of truth + safe dynamic modules */
 (function(){
   'use strict';
   if(window.GamaAccessControl)return;
@@ -30,7 +30,30 @@
     el.innerHTML='👤 <b>'+esc(s.name||s.username||'Utilisateur')+'</b><span>·</span><span class="gamaAccessRole">'+esc(ROLE_LABEL[s.role]||s.role)+'</span><button type="button" id="gamaAccessLogout">Salir</button>';
     el.querySelector('#gamaAccessLogout').onclick=async()=>{const b=el.querySelector('button');b.disabled=true;b.textContent='…';try{await window.GamaCloud?.signOut()}catch(e){console.warn('[GAMA] signOut',e)}localStorage.removeItem('gama_session_v1');sessionStorage.removeItem('gama_session_v1');location.reload();};
   }
-  function protectShowTab(){const current=window.showTab;if(typeof current!=='function'||current.__gamaAccess)return;const wrapped=function(id,el){if(id==='mainmenu')return current.apply(this,arguments);if(id==='client-catalog')return window.GamaMenu?.open('client-catalog');if(id==='customer-requests')return window.GamaMenu?.open('customer-requests');if(!can(id)){console.warn('[GAMA] Access denied:',id);return false;}return current.apply(this,arguments);};wrapped.__gamaAccess=true;window.showTab=wrapped;}
+  function protectShowTab(){
+    const current=window.showTab;
+    if(typeof current!=='function'||current.__gamaAccess)return;
+    const wrapped=function(id,el){
+      if(id==='mainmenu')return current.apply(this,arguments);
+      if(!can(id)){console.warn('[GAMA] Access denied:',id);return false;}
+      if(id==='client-catalog'){
+        current.apply(this,arguments);
+        window.GamaOpenClientCatalog?.();
+        return true;
+      }
+      if(id==='customer-requests'){
+        current.apply(this,arguments);
+        window.GamaOpenCustomerRequests?.();
+        return true;
+      }
+      if(id==='excel-import'){
+        window.GamaOpenExcelImport?.();
+        return true;
+      }
+      return current.apply(this,arguments);
+    };
+    wrapped.__gamaAccess=true;window.showTab=wrapped;
+  }
   function sync(){userBar();window.GamaMenu?.render();if(session()?.role==='client')document.querySelectorAll('.tabs .tab').forEach(b=>{if(b.id!=='clientCatalogTab')b.style.display='none';});}
   function init(){window.GamaAccessControl={can,session,sync};style();protectShowTab();sync();window.addEventListener('gama:auth-ready',sync);window.addEventListener('gama:auth-change',()=>setTimeout(sync,0));window.addEventListener('gama:menu-ready',protectShowTab);window.addEventListener('gama:data-ready',()=>{protectShowTab();sync();});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
