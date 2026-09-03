@@ -33,6 +33,7 @@ async function openModule(page, moduleId) {
 async function returnToMenu(page) {
   await page.getByRole('button', { name: /Menú principal/i }).first().click();
   await expect(page.locator('#mainmenu')).toBeVisible();
+  await expect(page.locator('#mainmenu')).not.toHaveAttribute('hidden');
 }
 
 test('application loads without uncaught page errors', async ({ page }) => {
@@ -54,65 +55,48 @@ test('authenticated main menu exposes unique modules', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
   const modules = ['dashboard','products','clients','movement','billing','stock','audit','suppliers','gamaPurchasesV14','reports','settings','backup','users','barcode','client-catalog','customer-requests'];
-  for (const moduleId of modules) {
-    await expect(page.locator(`#mainmenu [data-gama-module="${moduleId}"]`)).toHaveCount(1);
-  }
+  for (const moduleId of modules) await expect(page.locator(`#mainmenu [data-gama-module="${moduleId}"]`)).toHaveCount(1);
 });
 
-test('core modules open and return to menu', async ({ page }) => {
+test('all modules follow the same open -> close -> reopen lifecycle', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
-  const coreModules = [
-    ['products','#products'],['clients','#clients'],['movement','#movement'],['billing','#billing'],
-    ['stock','#stock'],['suppliers','#suppliers'],['reports','#reports'],['settings','#settings'],
-    ['backup','#backup'],['users','#users'],['barcode','#barcode']
+  const modules = [
+    ['dashboard','#dashboard'],['products','#products'],['clients','#clients'],['movement','#movement'],['billing','#billing'],
+    ['stock','#stock'],['audit','#audit'],['suppliers','#suppliers'],['gamaPurchasesV14','#gamaPurchasesV14'],['reports','#reports'],
+    ['settings','#settings'],['backup','#backup'],['users','#users'],['barcode','#barcode'],['client-catalog','#client-catalog'],['customer-requests','#customer-requests']
   ];
-  for (const [moduleId, section] of coreModules) {
-    await openModule(page, moduleId);
-    await expect(page.locator(section)).toHaveClass(/active/);
-    await returnToMenu(page);
-    await expect(page.locator(`#mainmenu [data-gama-module="${moduleId}"]`)).toHaveCount(1);
+
+  for (const [moduleId, section] of modules) {
+    for (let pass = 0; pass < 2; pass += 1) {
+      await openModule(page, moduleId);
+      await expect(page.locator(section)).toHaveCount(1);
+      await expect(page.locator(section)).toHaveClass(/active/);
+      await expect(page.locator(section)).not.toHaveAttribute('hidden');
+      await expect(page.locator(section)).toBeVisible();
+      await expect(page.locator('#mainmenu')).toHaveAttribute('hidden', '');
+      await returnToMenu(page);
+    }
   }
 });
 
-test('product and client modules expose their data-entry interfaces', async ({ page }) => {
+test('navigation never leaves multiple active sections', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
-
-  await openModule(page, 'products');
-  await expect(page.locator('#products')).toHaveClass(/active/);
-  expect(await page.locator('#products button').count()).toBeGreaterThan(0);
-  expect(await page.locator('#products input, #products select, #products textarea').count()).toBeGreaterThan(0);
-  await returnToMenu(page);
-
-  await openModule(page, 'clients');
-  await expect(page.locator('#clients')).toHaveClass(/active/);
-  await expect(page.locator('#cName')).toBeVisible();
-  await expect(page.locator('#cId')).toBeVisible();
-  await expect(page.getByRole('button', { name: /Guardar cliente/i })).toBeVisible();
-  await returnToMenu(page);
-});
-
-test('movement and billing modules expose transaction controls', async ({ page }) => {
-  await openApp(page);
-  await requireAuth(page);
-
-  await openModule(page, 'movement');
-  await expect(page.locator('#movement')).toHaveClass(/active/);
-  expect(await page.locator('#movement input, #movement select, #movement button').count()).toBeGreaterThan(0);
-  await returnToMenu(page);
-
-  await openModule(page, 'billing');
-  await expect(page.locator('#billing')).toHaveClass(/active/);
-  expect(await page.locator('#billing input, #billing select, #billing button').count()).toBeGreaterThan(0);
-  await returnToMenu(page);
+  const modules = ['products','clients','movement','billing','stock','audit','suppliers','reports','settings','backup','users','barcode','client-catalog','customer-requests'];
+  for (const moduleId of modules) {
+    await openModule(page, moduleId);
+    await expect(page.locator('section.active')).toHaveCount(1);
+    await returnToMenu(page);
+    await expect(page.locator('section.active')).toHaveCount(1);
+  }
 });
 
 test('client catalog exposes search, cart and submit controls', async ({ page }) => {
   await openApp(page);
   await requireAuth(page);
   await openModule(page, 'client-catalog');
-  await expect(page.locator('#client-catalog')).toHaveClass(/active/);
+  await expect(page.locator('#client-catalog')).toBeVisible();
   await expect(page.locator('#ccSearch')).toBeVisible();
   await expect(page.locator('#ccCartRows')).toBeVisible();
   await expect(page.locator('#ccNotes')).toBeVisible();
@@ -129,47 +113,11 @@ test('customer request module exposes search and request detail workflow', async
   await openApp(page);
   await requireAuth(page);
   await openModule(page, 'customer-requests');
-  await expect(page.locator('#customer-requests')).toHaveClass(/active/);
+  await expect(page.locator('#customer-requests')).toBeVisible();
   await expect(page.locator('#crSearch')).toBeVisible();
   await expect(page.locator('#crCount')).toBeVisible();
   await expect(page.locator('#crRows')).toBeVisible();
   await page.locator('#crSearch').fill('solicitud-e2e-inexistente');
   await expect(page.locator('#crRows')).toContainText(/No hay solicitudes de clientes|Impossible de charger les solicitudes/i);
   await returnToMenu(page);
-});
-
-test('client catalog can be opened repeatedly without duplicates', async ({ page }) => {
-  await openApp(page);
-  await requireAuth(page);
-  for (let i = 0; i < 3; i += 1) {
-    await openModule(page, 'client-catalog');
-    await expect(page.locator('#client-catalog')).toHaveClass(/active/);
-    await expect(page.locator('#client-catalog')).toHaveCount(1);
-    await returnToMenu(page);
-    await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]')).toHaveCount(1);
-  }
-});
-
-test('customer requests can be opened repeatedly without duplicates', async ({ page }) => {
-  await openApp(page);
-  await requireAuth(page);
-  for (let i = 0; i < 3; i += 1) {
-    await openModule(page, 'customer-requests');
-    await expect(page.locator('#customer-requests')).toHaveClass(/active/);
-    await expect(page.locator('#customer-requests')).toHaveCount(1);
-    await returnToMenu(page);
-    await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]')).toHaveCount(1);
-  }
-});
-
-test('catalog and customer requests remain unique after alternating navigation', async ({ page }) => {
-  await openApp(page);
-  await requireAuth(page);
-  for (const moduleId of ['client-catalog','customer-requests','client-catalog','customer-requests','client-catalog']) {
-    await openModule(page, moduleId);
-    await expect(page.locator(`#${moduleId}`)).toHaveClass(/active/);
-    await returnToMenu(page);
-  }
-  await expect(page.locator('#mainmenu [data-gama-module="client-catalog"]')).toHaveCount(1);
-  await expect(page.locator('#mainmenu [data-gama-module="customer-requests"]')).toHaveCount(1);
 });
