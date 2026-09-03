@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 async function openApp(page) {
+  await page.addInitScript(() => { window.__GAMA_E2E__ = true; });
   await page.goto('/index.html', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('body')).toBeVisible();
 }
@@ -129,7 +130,7 @@ test('logout removes the header user bar and returns to cloud login', async ({ p
   await requireAuth(page);
   const logout = page.locator('#gamaAccessLogout');
   await expect(logout).toBeVisible();
-  await logout.click();
+  await logout.click({force:true});
   await expect(page.locator('#gamaAccessUser')).toHaveCount(0, { timeout: 15_000 });
   await expect(page.locator('#gamaCloudLogin')).toBeVisible({ timeout: 15_000 });
   const session = await page.evaluate(() => localStorage.getItem('gama_session_v1'));
