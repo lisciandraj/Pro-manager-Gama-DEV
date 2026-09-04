@@ -21,13 +21,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Bust GAMA JS cache
+      - name: Bust GAMA asset cache
         run: |
-          sed -i "s/gama-supabase.js?v=13/gama-supabase.js?v=${GITHUB_SHA}/g" index.html
-          sed -i "s/gama-access-control.js?v=1/gama-access-control.js?v=${GITHUB_SHA}/g" index.html
-          sed -i "s/gama-fixed-header.js?v=4/gama-fixed-header.js?v=${GITHUB_SHA}/g" index.html
-          sed -i "s/gama-menu-final2.js?v=6/gama-menu-final2.js?v=${GITHUB_SHA}/g" index.html
-          sed -i "s/gama-role-spanish.js?v=1/gama-role-spanish.js?v=${GITHUB_SHA}/g" index.html
+          # Stamps every "?v=..." on every script/style tag in index.html with this
+          # commit's SHA in one pass, so a new deploy always busts the CDN cache for
+          # every asset — no per-file version to remember or keep in sync by hand.
+          sed -i "s/?v=[A-Za-z0-9._-]*\"/?v=${GITHUB_SHA}\"/g" index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
