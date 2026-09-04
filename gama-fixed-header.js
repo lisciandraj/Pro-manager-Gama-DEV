@@ -49,9 +49,9 @@
     document.getElementById('gamaFixedHeaderStyle')?.remove();
     var s=document.createElement('style');s.id='gamaFixedHeaderStyle';
     s.textContent=`
-      header.gamaHeader{position:relative!important;top:auto!important;z-index:5000!important;isolation:isolate!important;box-sizing:border-box!important;background:#fff!important}
+      header.gamaHeader{position:sticky!important;top:0!important;z-index:5000!important;isolation:isolate!important;box-sizing:border-box!important;background:#fff!important}
       header.gamaHeader .headIcon.plus{display:none!important}
-      #gamaAccountSlot{position:relative!important;width:100%!important;box-sizing:border-box!important;z-index:4999!important;margin:0!important;padding:0 14px!important;display:flex!important;align-items:center!important}
+      #gamaAccountSlot{position:sticky!important;top:112px!important;width:100%!important;box-sizing:border-box!important;z-index:4999!important;margin:0!important;padding:0 14px!important;display:flex!important;align-items:center!important;background:#fff!important;box-shadow:0 4px 10px #18324a0f!important}
       #gamaAccountSlot #gamaAccessUser,#gamaAccountSlot #gamaACLUser{position:relative!important;inset:auto!important;transform:none!important;z-index:5000!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;width:100%!important;max-width:none!important;min-width:0!important;height:52px!important;margin:10px 0 12px!important;padding:7px 13px!important;box-sizing:border-box!important;overflow:hidden!important;white-space:nowrap!important;border:1px solid #dfe7eb!important;border-radius:18px!important;background:#fff!important;box-shadow:0 3px 12px #18324a0c!important;font-size:15px!important;gap:10px!important}
       #gamaAccountSlot #gamaAccessUser b,#gamaAccountSlot #gamaACLUser b{font-size:15px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
       #gamaAccountSlot #gamaAccessUser button,#gamaAccountSlot #gamaACLUser button{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important;flex:0 0 auto!important;white-space:nowrap!important;margin-left:auto!important;min-height:36px!important;padding:7px 14px!important;border-radius:999px!important}
@@ -61,7 +61,7 @@
       @media(min-width:701px){
         header.gamaHeader{min-height:106px!important;height:106px!important;padding:14px 18px!important}
         header.gamaHeader .brandMobile img{width:58px!important;height:58px!important}
-        #gamaAccountSlot{padding:0 18px!important}
+        #gamaAccountSlot{top:106px!important;padding:0 18px!important}
         #gamaAccountSlot #gamaAccessUser,#gamaAccountSlot #gamaACLUser{height:54px!important;margin:10px 0 14px!important}
       }
       @media(max-width:700px){
