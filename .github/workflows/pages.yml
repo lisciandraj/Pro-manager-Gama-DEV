@@ -25,8 +25,17 @@ jobs:
         run: |
           # Stamps every "?v=..." on every script/style tag in index.html with this
           # commit's SHA in one pass, so a new deploy always busts the CDN cache for
-          # every asset — no per-file version to remember or keep in sync by hand.
-          sed -i "s/?v=[A-Za-z0-9._-]*\"/?v=${GITHUB_SHA}\"/g" index.html
+          # every asset - no per-file version to remember or keep in sync by hand.
+          # Uses single-quote concatenation (no backslash-escaped quotes) since a
+          # prior version of this line silently substituted zero times in CI while
+          # working fine locally, and shipped stale assets for weeks undetected.
+          sed -i 's/?v=[A-Za-z0-9._-]*"/?v='"$GITHUB_SHA"'"/g' index.html
+          stamped=$(grep -c "?v=$GITHUB_SHA" index.html || true)
+          echo "Stamped $stamped asset URL(s) with $GITHUB_SHA"
+          if [ "$stamped" -eq 0 ]; then
+            echo "::error::Cache-busting made zero substitutions in index.html - refusing to deploy stale asset URLs"
+            exit 1
+          fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
