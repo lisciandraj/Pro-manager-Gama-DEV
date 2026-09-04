@@ -21,7 +21,7 @@ jobs:
           let h=fs.readFileSync(p,'utf8');
           h=h.replace(/gama-menu-final2\.js\?v=\d+/,'gama-menu-final2.js?v=10');
           h=h.replace(/gama-excel-module-loader\.js\?v=\d+/,'gama-excel-module-loader.js?v=12');
-          h=h.replace(/gama-excel-import\.js\?v=\d+/,'gama-excel-import.js?v=9');
+          h=h.replace(/gama-excel-import\.js\?v=\d+/,'gama-excel-import.js?v=10');
           h=h.replace("'import excel','importar excel'","");
           if(!h.includes('gama-client-catalog.js?v=7')){
             h=h.replace(/<script src="gama-menu-final2\.js\?v=10"><\/script>/,
