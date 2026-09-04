@@ -27,9 +27,13 @@ jobs:
             h=h.replace(/<script src="gama-menu-final2\.js\?v=10"><\/script>/,
               '<script src="gama-client-catalog.js?v=7"></script>\n<script src="gama-customer-requests.js?v=4"></script>\n$&');
           }
+          if(!h.includes('gama-excel-mobile-fix.js?v=1')){
+            h=h.replace(/<script src="gama-excel-module-loader\.js\?v=12"><\/script>/,
+              '$&\n<script src="gama-excel-mobile-fix.js?v=1"></script>');
+          }
           fs.writeFileSync(p,h);
           NODE
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || (git commit -m "fix: refresh Excel importer" && git push)
+          git diff --cached --quiet || (git commit -m "fix: responsive Excel importer" && git push)
