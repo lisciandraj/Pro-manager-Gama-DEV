@@ -1,4 +1,4 @@
-/* GAMA Module Loader — Excel + Achats + Settings V31 */
+/* GAMA Module Loader — Excel + Achats + Settings V32 */
 (function(){
   'use strict';
   const PURCHASES='gama-purchases-v14.js?v=20260827-5';
@@ -34,7 +34,7 @@
     loadScript(PURCHASES).then(run).catch(function(e){console.error('[GAMA] Achats load error',e);alert('Le module Achats n’a pas pu être chargé. Rechargez la page.')});
   }
 
-  function getExcelContent(){return document.getElementById('excelImport')}
+  function getExcelContent(){return document.getElementById('gamaExcelImport')}
 
   function renderExcel(){
     if(window.GamaExcelImport&&typeof window.GamaExcelImport.render==='function'){
