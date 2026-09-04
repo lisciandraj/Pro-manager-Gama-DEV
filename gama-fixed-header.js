@@ -60,7 +60,7 @@
       header.gamaHeader .headActions .headIcon{display:none!important}
       @media(min-width:701px){
         header.gamaHeader{min-height:106px!important;height:106px!important;padding:14px 18px!important}
-        header.gamaHeader .brandMobile img{width:58px!important;height:58px!important}
+        header.gamaHeader .brandMobile img{width:42px!important;height:42px!important}
         #gamaAccountSlot{top:106px!important;padding:0 18px!important}
         #gamaAccountSlot #gamaAccessUser,#gamaAccountSlot #gamaACLUser{height:54px!important;margin:10px 0 14px!important}
       }
@@ -68,7 +68,7 @@
         header.gamaHeader{min-height:112px!important;height:112px!important;padding:14px 12px!important;align-items:center!important}
         header.gamaHeader .headerLeft{width:100%!important;min-width:0!important}
         header.gamaHeader .brandMobile{gap:8px!important;min-width:0!important}
-        header.gamaHeader .brandMobile img{width:50px!important;height:50px!important;flex:0 0 50px!important}
+        header.gamaHeader .brandMobile img{width:38px!important;height:38px!important;flex:0 0 38px!important}
         header.gamaHeader .brandMobile h1{font-size:16px!important;white-space:nowrap!important}
         header.gamaHeader .brandMobile small{font-size:10px!important;white-space:nowrap!important}
         header.gamaHeader .headActions{position:absolute!important;right:12px!important;top:14px!important;z-index:6000!important}
