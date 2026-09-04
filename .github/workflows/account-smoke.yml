@@ -22,4 +22,4 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run cloud account smoke test
-        run: npx playwright test tests/gama-navigation.spec.js -g "admin can open cloud accounts and create a client account"
+        run: npx playwright test tests/gama-navigation.spec.js -g "cloud accounts can create a client account"
