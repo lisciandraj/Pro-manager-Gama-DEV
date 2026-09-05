@@ -27,7 +27,7 @@
       const slot=document.getElementById('gamaAccountSlot');
       (slot||document.body).appendChild(el);
     }
-    el.innerHTML='👤 <b>'+esc(s.name||s.username||'Utilisateur')+'</b><span>·</span><span class="gamaAccessRole">'+esc(ROLE_LABEL[s.role]||s.role)+'</span><button type="button" id="gamaAccessLogout">Salir</button>';
+    el.innerHTML='👤 <b>'+esc(s.name||s.username||'Usuario')+'</b><span>·</span><span class="gamaAccessRole">'+esc(ROLE_LABEL[s.role]||s.role)+'</span><button type="button" id="gamaAccessLogout">Salir</button>';
     el.querySelector('#gamaAccessLogout').onclick=async()=>{const b=el.querySelector('button');b.disabled=true;b.textContent='…';try{await window.GamaCloud?.signOut()}catch(e){console.warn('[GAMA] signOut',e)}localStorage.removeItem('gama_session_v1');sessionStorage.removeItem('gama_session_v1');location.reload();};
   }
   function protectShowTab(){
