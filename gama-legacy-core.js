@@ -89,7 +89,7 @@
     const old = editing ? product(editing) : null;
     let photo = old?.photo || '';
     if ($('pPhoto').files[0]) photo = await compressPhoto($('pPhoto').files[0]);
-    const data = { barcode, name, ref: $('pRef').value.trim(), cat: $('pCat').value.trim(), loc: $('pLoc').value.trim(), min: Number($('pMin').value) || 0, price: Number($('pPrice').value) || 0, iva: Number($('pIva').value), photo };
+    const data = { barcode, name, ref: $('pRef').value.trim(), cat: $('pCat').value.trim(), description: $('pDescription').value.trim(), family: $('pFamily').value.trim(), lines: $('pLines').value.trim(), brand: $('pBrand').value.trim(), presentation: $('pPresentation').value.trim(), loc: $('pLoc').value.trim(), min: Number($('pMin').value) || 0, maxStock: Number($('pMaxStock').value) || 0, qtyCarton: Number($('pQtyCarton').value) || 0, weightG: Number($('pWeight').value) || 0, volumeCm3: Number($('pVolume').value) || 0, price: Number($('pPrice').value) || 0, iva: Number($('pIva').value), photo };
     if (old) { Object.assign(old, data); alert('Producto actualizado correctamente.'); }
     else { db.products.push({ ...data, stock: 0 }); alert('Producto creado correctamente.'); }
     clearProductForm(); save();
@@ -97,13 +97,13 @@
 
   function editProduct(barcode) {
     const p = product(barcode); if (!p) return;
-    $('editingBarcode').value = p.barcode; $('pBarcode').value = p.barcode; $('pName').value = p.name; $('pRef').value = p.ref || ''; $('pCat').value = p.cat || ''; $('pLoc').value = p.loc || ''; $('pMin').value = p.min || 0; $('pPrice').value = p.price || 0; $('pIva').value = p.iva ?? 15;
+    $('editingBarcode').value = p.barcode; $('pBarcode').value = p.barcode; $('pName').value = p.name; $('pRef').value = p.ref || ''; $('pCat').value = p.cat || ''; $('pDescription').value = p.description || ''; $('pFamily').value = p.family || ''; $('pLines').value = p.lines || ''; $('pBrand').value = p.brand || ''; $('pPresentation').value = p.presentation || ''; $('pLoc').value = p.loc || ''; $('pMin').value = p.min || 0; $('pMaxStock').value = p.maxStock || 0; $('pQtyCarton').value = p.qtyCarton || 0; $('pWeight').value = p.weightG || 0; $('pVolume').value = p.volumeCm3 || 0; $('pPrice').value = p.price || 0; $('pIva').value = p.iva ?? 15;
     if (p.photo) { $('pPreview').src = p.photo; $('pPreview').style.display = 'block'; }
     showTab('products', null); window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function clearProductForm() {
-    $('editingBarcode').value = ''; ['pBarcode', 'pName', 'pRef', 'pCat', 'pLoc'].forEach(id => $(id).value = ''); $('pMin').value = 0; $('pPrice').value = 0; $('pIva').value = 15; $('pPhoto').value = ''; $('pPreview').src = ''; $('pPreview').style.display = 'none';
+    $('editingBarcode').value = ''; ['pBarcode', 'pName', 'pRef', 'pCat', 'pLoc', 'pDescription', 'pFamily', 'pLines', 'pBrand', 'pPresentation'].forEach(id => $(id).value = ''); $('pMin').value = 0; $('pMaxStock').value = 0; $('pQtyCarton').value = 0; $('pWeight').value = 0; $('pVolume').value = 0; $('pPrice').value = 0; $('pIva').value = 15; $('pPhoto').value = ''; $('pPreview').src = ''; $('pPreview').style.display = 'none';
   }
 
   function deleteProduct(barcode) {
@@ -115,7 +115,7 @@
 
   function renderProducts(filter = '') {
     const q = filter.toLowerCase(); const rows = db.products.filter(p => (p.name + ' ' + p.barcode + ' ' + p.ref + ' ' + p.cat).toLowerCase().includes(q));
-    $('productsTable').innerHTML = '<table><tr><th>Foto</th><th>Código</th><th>Producto</th><th>Stock</th><th>Precio USD</th><th>IVA</th><th>Ubicación</th><th>Acciones</th></tr>' + rows.map(p => `<tr><td>${p.photo ? `<img class="product-img" src="${p.photo}">` : '📦'}</td><td>${p.barcode}</td><td>${p.name}</td><td class="${p.stock <= p.min ? 'low' : ''}">${p.stock}</td><td><b>$${Number(p.price || 0).toFixed(2)}</b></td><td>${Number(p.iva || 0)}%</td><td>${p.loc || '-'}</td><td><button class="secondary" onclick="editProduct('${p.barcode}')">✏️ Editar</button> <button class="danger" onclick="deleteProduct('${p.barcode}')">🗑️ Eliminar</button></td></tr>`).join('') + '</table>';
+    $('productsTable').innerHTML = '<table><tr><th>Foto</th><th>Código</th><th>Producto</th><th>Marca</th><th>Stock</th><th>Precio USD</th><th>IVA</th><th>Ubicación</th><th>Acciones</th></tr>' + rows.map(p => `<tr><td>${p.photo ? `<img class="product-img" src="${p.photo}">` : '📦'}</td><td>${p.barcode}</td><td>${p.name}</td><td>${p.brand || '-'}</td><td class="${p.stock <= p.min ? 'low' : ''}">${p.stock}</td><td><b>$${Number(p.price || 0).toFixed(2)}</b></td><td>${Number(p.iva || 0)}%</td><td>${p.loc || '-'}</td><td><button class="secondary" onclick="editProduct('${p.barcode}')">✏️ Editar</button> <button class="danger" onclick="deleteProduct('${p.barcode}')">🗑️ Eliminar</button></td></tr>`).join('') + '</table>';
   }
 
   function saveClient() {
