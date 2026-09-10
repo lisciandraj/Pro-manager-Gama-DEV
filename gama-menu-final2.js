@@ -1,15 +1,79 @@
-/* GAMA — Navigation centrale v4: clean GAMA line-icon menu */
+/* GAMA — Navigation centrale v5: grouped GAMA line-icon menu with quick search */
 (function(){
 'use strict';
 if(window.GamaMenu)return;
 const ICONS={chart:'<path d="M4 19V10m5 9V6m5 13v-8m5 8V3"/><path d="m4 9 5-4 5 3 6-6"/>',cube:'<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',users:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c.5-4 2.5-6 6-6s5.5 2 6 6M15 14c3 0 5 1.5 6 4"/>',move:'<path d="M7 4v16M17 20V4M4 7l3-3 3 3M14 17l3 3 3-3"/>',invoice:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6M9 16h4"/>',stock:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',audit:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/>',truck:'<path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/>',cart:'<path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 1.9-1.4L20 8H6"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',sheet:'<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 12l6 6M15 12l-6 6"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M19 12h2M3 12h2M12 3v2M12 19v2M18 6l-2 2M8 16l-2 2M18 18l-2-2M8 8 6 6"/>',cloud:'<path d="M7 18h11a4 4 0 0 0 .5-8 6 6 0 0 0-11.6 1A3.5 3.5 0 0 0 7 18Z"/><path d="M12 12v6m0 0-2-2m2 2 2-2"/>',user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/>',barcode:'<path d="M4 5v14M7 5v14M10 5v14M14 5v14M17 5v14M20 5v14"/>',catalog:'<path d="M3.5 5.5h2l1.7 9.2a1.8 1.8 0 0 0 1.8 1.5h7.8a1.8 1.8 0 0 0 1.7-1.3L20.2 9H7"/><circle cx="9" cy="19" r="1.2"/><circle cx="17" cy="19" r="1.2"/>',request:'<rect x="6" y="3.5" width="12" height="17" rx="1.8"/><path d="M9 3.5h6v2H9zM9 9h6M9 12.5h6M9 16h4"/>'};
-const ITEMS=[['Compras','gamaPurchasesV14','cart','admin,commercial'],['Panel de control','dashboard','chart','*'],['Productos','products','cube','*'],['Clientes','clients','users','admin,commercial'],['Solicitudes de clientes','customer-requests','request','admin,commercial'],['Importar Excel','excel-import','sheet','admin,commercial'],['Entradas / Salidas','movement','move','admin,commercial,magasinier'],['Facturación','billing','invoice','admin,commercial'],['Inventario','stock','stock','admin,commercial,magasinier'],['Auditoría','audit','audit','admin'],['Proveedores','suppliers','truck','admin,commercial'],['Configuración','settings','gear','admin'],['Copias de seguridad','backup','cloud','admin'],['Usuarios','users','user','admin'],['Códigos de barras','barcode','barcode','admin,commercial,magasinier'],['Catálogo de productos','client-catalog','catalog','admin,commercial,client']];
+/* [label, section id, icon key, allowed roles, category] */
+const ITEMS=[
+  ['Panel de control','dashboard','chart','*','Resumen'],
+  ['Compras','gamaPurchasesV14','cart','admin,commercial','Ventas'],
+  ['Facturación','billing','invoice','admin,commercial','Ventas'],
+  ['Clientes','clients','users','admin,commercial','Ventas'],
+  ['Solicitudes de clientes','customer-requests','request','admin,commercial','Ventas'],
+  ['Catálogo de productos','client-catalog','catalog','admin,commercial,client','Ventas'],
+  ['Productos','products','cube','*','Inventario'],
+  ['Entradas / Salidas','movement','move','admin,commercial,magasinier','Inventario'],
+  ['Inventario','stock','stock','admin,commercial,magasinier','Inventario'],
+  ['Proveedores','suppliers','truck','admin,commercial','Inventario'],
+  ['Códigos de barras','barcode','barcode','admin,commercial,magasinier','Inventario'],
+  ['Importar Excel','excel-import','sheet','admin,commercial','Sistema'],
+  ['Auditoría','audit','audit','admin','Sistema'],
+  ['Configuración','settings','gear','admin','Sistema'],
+  ['Copias de seguridad','backup','cloud','admin','Sistema'],
+  ['Usuarios','users','user','admin','Sistema']
+];
+const CATEGORY_ORDER=['Resumen','Ventas','Inventario','Sistema'];
 function role(){try{return JSON.parse(localStorage.getItem('gama_session_v1')||'null')?.role||''}catch(_){return ''}}
 function allowed(rules){const r=role();return rules==='*'||rules.split(',').includes(r)}
 function open(id){if(id==='excel-import')return typeof window.GamaOpenExcelImport==='function'?window.GamaOpenExcelImport():false;if(typeof window.showTab!=='function')return false;const ok=window.showTab(id,null);if(!ok)return false;if(id==='client-catalog')window.GamaOpenClientCatalog?.();if(id==='customer-requests')window.GamaOpenCustomerRequests?.();return true}
-function style(){if(document.getElementById('gamaMenuStyle'))return;const s=document.createElement('style');s.id='gamaMenuStyle';s.textContent=`#mainmenu{background:#f7f9fa!important;min-height:calc(100vh - 1px);padding-bottom:28px!important}#mainmenu .gamaF2Heading{margin:28px 18px 6px!important;color:#173246!important;font-size:29px!important;line-height:1.12!important;font-weight:850!important;letter-spacing:-.5px!important}#mainmenu .gamaF2Subheading{margin:0 18px 24px!important;color:#7b8992!important;font-size:15px!important;line-height:1.35!important}#mainmenu .gamaF2Grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:0 18px 24px}#mainmenu .gamaF2Card{appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:140px;padding:16px 12px;margin:0;background:#fff;border:1px solid #e4ebee;border-radius:20px;box-shadow:0 4px 18px #18324a0d;color:#173246;cursor:pointer;transition:transform .15s,box-shadow .15s}#mainmenu .gamaF2Card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #18324a16}#mainmenu .gamaF2Icon{display:flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:16px;background:#eaf6f7;color:#087c8b;margin-bottom:14px;flex:0 0 auto}#mainmenu .gamaF2Icon.orange{background:#fff1e6;color:#f47a2a}#mainmenu .gamaF2Icon svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}#mainmenu .gamaF2Title{font-size:17px;font-weight:850;line-height:1.22;text-align:center;color:#173246}@media(max-width:900px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 14px 22px}}@media(max-width:600px){#mainmenu .gamaF2Heading{margin:26px 18px 7px!important;font-size:29px!important}#mainmenu .gamaF2Subheading{margin:0 18px 26px!important;font-size:15px!important}#mainmenu .gamaF2Grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:0 14px 28px}#mainmenu .gamaF2Card{min-height:148px;padding:14px 8px;border-radius:20px}#mainmenu .gamaF2Icon{width:64px;height:64px;border-radius:16px;margin-bottom:16px}#mainmenu .gamaF2Icon svg{width:36px;height:36px;stroke-width:1.7}#mainmenu .gamaF2Title{font-size:17px;line-height:1.25}}`;document.head.appendChild(s)}
+function style(){if(document.getElementById('gamaMenuStyle'))return;const s=document.createElement('style');s.id='gamaMenuStyle';s.textContent=`
+#mainmenu{background:#f7f9fa!important;min-height:calc(100vh - 1px);padding-bottom:28px!important}
+#mainmenu .gamaF2Heading{margin:28px 18px 6px!important;color:#173246!important;font-size:29px!important;line-height:1.12!important;font-weight:850!important;letter-spacing:-.5px!important}
+#mainmenu .gamaF2Subheading{margin:0 18px 18px!important;color:#7b8992!important;font-size:15px!important;line-height:1.35!important}
+#mainmenu .gamaF2SearchWrap{margin:0 18px 22px;position:relative;max-width:420px}
+#mainmenu .gamaF2Search{width:100%;padding:12px 14px 12px 40px;border:1px solid #d4e0e4;border-radius:12px;font-size:14px;background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2371808a" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>') 12px center/17px no-repeat;box-sizing:border-box;transition:border-color .12s ease,box-shadow .12s ease}
+#mainmenu .gamaF2Search:focus{outline:none;border-color:#087c8b;box-shadow:0 0 0 3px rgba(8,124,139,.16)}
+#mainmenu .gamaF2Section{margin:22px 18px 12px;font-size:11px;font-weight:850;letter-spacing:1.2px;text-transform:uppercase;color:#95a2aa}
+#mainmenu .gamaF2Section:first-of-type{margin-top:0}
+#mainmenu .gamaF2Grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:0 18px 8px}
+#mainmenu .gamaF2Card{appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:138px;padding:16px 12px;margin:0;background:#fff;border:1px solid #e4ebee;border-radius:20px;box-shadow:0 3px 16px #18324a0d;color:#173246;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+#mainmenu .gamaF2Card:hover{transform:translateY(-3px);box-shadow:0 10px 26px #18324a17;border-color:#d4e3e7}
+#mainmenu .gamaF2Card:active{transform:translateY(-1px) scale(.98)}
+#mainmenu .gamaF2Icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#eaf6f7;color:#087c8b;margin-bottom:13px;flex:0 0 auto}
+#mainmenu .gamaF2Icon.orange{background:#fff1e6;color:#f47a2a}
+#mainmenu .gamaF2Icon svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#mainmenu .gamaF2Title{font-size:16px;font-weight:850;line-height:1.22;text-align:center;color:#173246}
+#mainmenu .gamaF2Card.gamaF2Hidden{display:none}
+#mainmenu .gamaF2NoResults{display:none;margin:8px 18px 20px;padding:26px;text-align:center;color:#7b8992;font-size:13px;background:#fff;border:1px dashed #d4e0e4;border-radius:16px}
+#mainmenu .gamaF2NoResults.gamaF2Show{display:block}
+@media(max-width:900px){#mainmenu .gamaF2Grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 14px 8px}#mainmenu .gamaF2Section{margin:20px 14px 10px}}
+@media(max-width:600px){#mainmenu .gamaF2Heading{margin:26px 18px 7px!important;font-size:26px!important}#mainmenu .gamaF2Subheading{margin:0 18px 16px!important;font-size:14px!important}#mainmenu .gamaF2SearchWrap{margin:0 14px 18px;max-width:none}#mainmenu .gamaF2Grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:0 14px 6px}#mainmenu .gamaF2Card{min-height:140px;padding:14px 8px;border-radius:18px}#mainmenu .gamaF2Icon{width:58px;height:58px;border-radius:16px;margin-bottom:12px}#mainmenu .gamaF2Icon svg{width:33px;height:33px;stroke-width:1.7}#mainmenu .gamaF2Title{font-size:15px;line-height:1.25}}
+`;document.head.appendChild(s)}
 function card(item,idx){const b=document.createElement('button');b.type='button';b.className='gamaF2Card';b.dataset.gamaModule=item[1];const icon=document.createElement('span');icon.className='gamaF2Icon'+(idx%2?' orange':'');icon.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+ICONS[item[2]]+'</svg>';const label=document.createElement('span');label.className='gamaF2Title';label.textContent=item[0];b.append(icon,label);b.onclick=()=>open(item[1]);return b}
-function render(){const host=document.getElementById('mainmenu');if(!host)return;style();const r=role();host.replaceChildren();const h=document.createElement('h2');h.className='gamaF2Heading';h.textContent='Menú principal';const p=document.createElement('p');p.className='gamaF2Subheading';p.textContent='Acceso rápido a las funciones de GAMA Stock Manager.';const grid=document.createElement('div');grid.className='gamaF2Grid';if(r)ITEMS.filter(x=>allowed(x[3])).forEach((x,idx)=>grid.appendChild(card(x,idx)));host.append(h,p,grid);window.dispatchEvent(new CustomEvent('gama:menu-ready'))}
-function init(){if(window.GamaMenu)return;window.GamaMenu={render,open};render();window.addEventListener('gama:auth-ready',render);window.addEventListener('gama:auth-change',()=>setTimeout(render,0))}
+function applyFilter(grid,q){const term=(q||'').trim().toLowerCase();let visible=0;grid.querySelectorAll('.gamaF2Card').forEach(c=>{const match=!term||c.dataset.gamaSearch.includes(term);c.classList.toggle('gamaF2Hidden',!match);if(match)visible++});grid.querySelectorAll('.gamaF2Section').forEach(h=>{const cat=h.dataset.gamaCategory;const anyVisible=[...grid.querySelectorAll(`.gamaF2Card[data-gama-category="${cat}"]`)].some(c=>!c.classList.contains('gamaF2Hidden'));h.style.display=anyVisible?'':'none'});const empty=grid.parentElement.querySelector('.gamaF2NoResults');if(empty)empty.classList.toggle('gamaF2Show',term&&visible===0)}
+function render(){const host=document.getElementById('mainmenu');if(!host)return;style();const r=role();host.replaceChildren();
+  const h=document.createElement('h2');h.className='gamaF2Heading';h.textContent='Menú principal';
+  const p=document.createElement('p');p.className='gamaF2Subheading';p.textContent='Acceso rápido a las funciones de GAMA Stock Manager.';
+  const searchWrap=document.createElement('div');searchWrap.className='gamaF2SearchWrap';
+  const search=document.createElement('input');search.type='search';search.className='gamaF2Search';search.placeholder='Buscar un módulo…';search.setAttribute('aria-label','Buscar un módulo');searchWrap.appendChild(search);
+  const gridWrap=document.createElement('div');
+  const grid=document.createElement('div');grid.className='gamaF2Grid';
+  if(r){
+    let idx=0;
+    CATEGORY_ORDER.forEach(cat=>{
+      const items=ITEMS.filter(x=>x[4]===cat&&allowed(x[3]));
+      if(!items.length)return;
+      const heading=document.createElement('div');heading.className='gamaF2Section';heading.textContent=cat;heading.dataset.gamaCategory=cat;heading.style.gridColumn='1/-1';
+      grid.appendChild(heading);
+      items.forEach(x=>{const c=card(x,idx++);c.dataset.gamaCategory=cat;c.dataset.gamaSearch=x[0].toLowerCase();grid.appendChild(c)});
+    });
+  }
+  const noResults=document.createElement('div');noResults.className='gamaF2NoResults';noResults.textContent='Ningún módulo coincide con tu búsqueda.';
+  search.oninput=()=>applyFilter(grid,search.value);
+  gridWrap.append(grid,noResults);
+  host.append(h,p,searchWrap,gridWrap);
+  window.dispatchEvent(new CustomEvent('gama:menu-ready'))
+}
+function init(){if(window.GamaMenu)return;window.GamaMenu={render,open,items:ITEMS,categories:CATEGORY_ORDER};render();window.addEventListener('gama:auth-ready',render);window.addEventListener('gama:auth-change',()=>setTimeout(render,0))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

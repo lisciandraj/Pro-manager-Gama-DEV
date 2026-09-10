@@ -11,11 +11,12 @@
     if(document.getElementById('gamaAccessStyle'))return;
     const s=document.createElement('style');s.id='gamaAccessStyle';
     s.textContent=`
-      .gamaAccessUser{position:relative;background:#fff;border:1px solid #e2e8ec;border-radius:999px;padding:7px 10px 7px 13px;font-size:13px;box-shadow:0 6px 22px #18324a20;display:flex;align-items:center;gap:7px;max-width:100%;box-sizing:border-box;white-space:nowrap}
+      .gamaAccessUser{position:relative;background:#fff;border:1px solid #e2e8ec;border-radius:999px;padding:7px 10px 7px 13px;font-size:13px;box-shadow:0 3px 12px #18324a0d;display:flex;align-items:center;gap:7px;max-width:100%;box-sizing:border-box;white-space:nowrap}
       .gamaAccessUser b{color:#18324a;font-weight:850;overflow:hidden;text-overflow:ellipsis}
-      .gamaAccessRole{font-weight:850;color:#087c8b}
-      .gamaAccessUser button{border:0;border-radius:999px;background:#eef3f4;color:#18324a;padding:7px 11px;font-weight:800;cursor:pointer;flex:0 0 auto;touch-action:manipulation}
-      .gamaAccessUser button:hover{background:#e5eef0}
+      .gamaAccessUser>span:not(.gamaAccessRole){display:none}
+      .gamaAccessRole{font-weight:850;color:#087c8b;background:#eaf6f7;padding:2px 8px;border-radius:999px;font-size:11px;margin-left:2px}
+      .gamaAccessUser button{border:0;border-radius:999px;background:#eef3f4;color:#18324a;padding:7px 12px;font-weight:750;cursor:pointer;flex:0 0 auto;touch-action:manipulation;transition:background-color .12s ease}
+      .gamaAccessUser button:hover{background:#ffe9e1;color:#c94f45}
       .gamaAccessUser button:disabled{opacity:.65;cursor:wait}
     `;document.head.appendChild(s);
   }
